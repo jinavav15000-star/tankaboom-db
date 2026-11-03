@@ -171,6 +171,22 @@ dialog.lb::backdrop{background:rgba(8,14,20,.78)}
 dialog.lb img{max-width:100%;max-height:72vh;display:block;margin:0 auto}
 dialog.lb p{margin:10px 0 0;text-align:center}
 dialog.lb button{position:absolute;top:8px;right:10px;background:var(--steel-3);border:0;border-radius:6px;padding:4px 10px;cursor:pointer}
+b.val{color:var(--ok);font-weight:700}
+.bgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:14px;align-items:start}
+.bgrid .panel{min-width:0}
+.ctl{margin-bottom:12px}
+.ctl>label,.ctl>.lab{display:block;font-size:13px;color:var(--ink-2);margin-bottom:4px}
+.ctl select{width:100%;background:var(--steel);border:1px solid var(--line);border-radius:8px;padding:7px 8px}
+.ctl .note{font-size:12.5px;color:var(--ink-2);margin-top:4px}
+.chiplist{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:4px 8px}
+.chiplist label{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px dashed var(--line);font-size:13px;cursor:pointer}
+.chiplist label:last-child{border-bottom:0}
+.chiplist input{margin-top:3px;accent-color:var(--hazard)}
+.up-g{color:var(--ok)} .dn-r{color:var(--danger)}
+.btn{background:var(--hazard);color:var(--hazard-ink);border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.sticky{position:sticky;top:110px}
+@media (max-width:860px){.bgrid{grid-template-columns:1fr}.sticky{position:static}}
 td img.cell{width:44px;height:44px;object-fit:contain;vertical-align:middle;background:var(--steel);border-radius:4px}
 
 footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:13px;padding:22px 0 40px}
@@ -202,6 +218,7 @@ footer p{max-width:80ch}
     </div>
     <nav class="tabs" aria-label="메뉴">
       <a href="#tanks">탱크</a>
+      <a href="#build">빌드 시뮬레이터</a>
       <a href="#compare">비교</a>
       <a href="#skills">스킬·특성</a>
       <a href="#parts">부품</a>
@@ -316,7 +333,7 @@ function spark(pts, w=260, h=64) {
 }
 
 // ---------- 라우터 ----------
-const ROUTES = {"": home, tanks, t: tankDetail, compare, skills, parts, chips, operators, skins, modes, growth, hidden, gallery, data};
+const ROUTES = {"": home, tanks, t: tankDetail, build, compare, skills, parts, chips, operators, skins, modes, growth, hidden, gallery, data};
 let lastRoute = null;
 function render() {
   const h = decodeURIComponent(location.hash.slice(1));
@@ -527,7 +544,7 @@ function tankDetail(id) {
 
   <h2>부품 슬롯</h2>
   <p class="muted small">슬롯마다 하나를 골라 장착합니다. 해제 비용은 크레딧 기준입니다.</p>
-  <div class="grid g-3">${t.slots.map((s, i) => `<div class="slot"><h3>슬롯 ${i+1} <span class="small muted">${esc(D.slotDef[i]?.type || "")}</span></h3>${s.map(pid => { const pt = D.parts[pid]; return pt ? `<div class="opt">${IMG(pt.icon, L(pt.name), "ico", 'width="40" height="40" style="float:right;margin-left:8px"')}<b>${L(pt.name) || esc(pt.key)}</b><div class="small">${L(pt.desc)}</div><div class="small muted">${costs(pt.cost)}${pt.ability ? " · " + esc(pt.ability) : ""}</div></div>` : `<div class="opt muted">#${pid}</div>`; }).join("")}</div>`).join("") || '<p class="muted">부품 정보 없음</p>'}</div>
+  <div class="grid g-3">${t.slots.map((s, i) => `<div class="slot"><h3>슬롯 ${i+1} <span class="small muted">${esc(D.slotDef[i]?.type || "")}</span></h3>${s.map(pid => { const pt = D.parts[pid]; return pt ? `<div class="opt">${IMG(pt.icon, L(pt.name), "ico", 'width="40" height="40" style="float:right;margin-left:8px"')}<b>${L(pt.name) || esc(pt.key)}</b><div class="small">${L(t.pdesc[pid] || pt.desc)}</div><div class="small muted">${costs(pt.cost)}${pt.ability ? " · " + esc(pt.ability) : ""}</div></div>` : `<div class="opt muted">#${pid}</div>`; }).join("")}</div>`).join("") || '<p class="muted">부품 정보 없음</p>'}</div>
 
   ${t.enh.length ? `<h2>강화 단계</h2><div class="panel scroll"><table class="tbl"><tr><th>단계</th><th>효과</th></tr>${t.enh.map(x => `<tr><td>+${x.lv}</td><td>${modText(x.mod)}</td></tr>`).join("")}</table></div>` : ""}
 
@@ -544,7 +561,7 @@ function tankDetail(id) {
     <dt>기본 스킨</dt><dd>${t.defaultSkin}</dd>
     <dt>체험 로스터 포함</dt><dd>${t.inRoster ? "예" : "아니오"}</dd>
   </dl></div>
-  <p style="margin-top:18px"><a href="#compare/${t.id}">이 탱크를 다른 탱크와 비교하기</a></p>`;
+  <p class="row" style="margin-top:18px;gap:16px"><a class="btn" style="text-decoration:none" href="#build/${t.id}">빌드 시뮬레이터로 열기</a><a href="#compare/${t.id}">다른 탱크와 비교하기</a></p>`;
   const lv = $("#lv"), out = $("#lvo");
   const draw = () => {
     const n = +lv.value, l = lvRow(t, n);
@@ -559,6 +576,153 @@ function tankDetail(id) {
 const SKINKIND = {default:"기본", silver:"실버 도색", gold:"골드 도색", camo:"위장 패턴", epic:"영웅", legendary:"전설", season:"시즌", event:"이벤트", other:"기타"};
 const chipCls = r => ({Silver:"r1", Golden:"r4", Prismatic:"r3"}[r] || "");
 const CHIPR = {Silver:"실버", Golden:"골드", Prismatic:"프리즘"};
+
+// ---------- 빌드 시뮬레이터 ----------
+// 능력치 모델: 값 = 기본 × (1 + Σ비율) + Σ절대값. 팩터류(…Factor·치명타)는 0에서 더한다.
+const MODMAP = {HP:"hp", TankArmor:"ar", BaseDamage:"dmg", ClipReloadTime:"reload", MagazineCapacity:"mag", EnergyMax:"eMax", StartEnergy:"eStart",
+  EnergyPerSecond:"epS", EnergyPerHit:"epH", CritChance:"crit", CritDamageMultiplier:"critMul", MaxSpeed:"speed", EnginePower:"accel",
+  TankRotation:"steer", TurretRotation:"turret", MainGunDamageFactor:"fMain", AbilityDamageFactor:"fAbil", SummonDamageFactor:"fSumm",
+  RamDamageFactor:"fRam", DamageToAIFactor:"fAI", AimingSpeedFactor:"aim", Dispersion:"disp"};
+const ADDITIVE = new Set(["crit","fMain","fAbil","fSumm","fRam","fAI"]);
+const STATROWS = [
+  ["hp","내구도",1,0],["ar","장갑",1,0],["ehp","유효 체력(내구도+장갑)",1,0],["dmg","1발 피해",1,0],["fMain","주무장 피해 보정",1,"%"],
+  ["reload","재장전(초)",-1,2],["mag","탄창",1,0],["dps","DPS(치명타 제외)",1,0],["edps","기대 DPS(치명타 포함)",1,0],
+  ["crit","치명타 확률",1,"%"],["critMul","치명타 배율",1,2],["eStart","시작 에너지",1,0],["epS","초당 에너지",1,2],["epH","타격당 에너지",1,2],
+  ["pm","파워 무브까지(초, 전탄 명중 가정)",-1,1],["fAbil","파워 무브 피해 보정",1,"%"],["fSumm","배치물 피해 보정",1,"%"],["fRam","충돌 피해 보정",1,"%"],
+  ["speed","최고 속력",1,"%"],["accel","가속도",1,"%"],["steer","선회 속도(°/s)",1,1],["turret","포탑 회전(°/s)",1,1],["disp","기본 분산",-1,3],["aim","조준 수렴 속도",1,2]];
+function baseStats(t, lv) {
+  const l = lvRow(t, lv), f = t.fire, e = t.energy, p = t.proj || {}, w = t.weapon || {};
+  return {hp:l.hp||0, ar:l.ar||0, dmg:l.dmg||0, reload:f.ClipReloadTime, minReload:f.MinClipReloadTime||0, mag:f.MagazineCapacity||1,
+    shell:f.ShellReloadTime || w.shellWait || 0, rate:w.dmgRate||1, eMax:e.EnergyMax, eCost:e.AbilityEnergyCost, eStart:e.StartEnergy||0,
+    epS:e.EnergyPerSecond||0, epH:e.EnergyPerHit||0, crit:p.SuperCritChance||0, critMul:p.SuperCritDamageMultiplier||p.CritDamageMultiplier||1,
+    speed:1, accel:1, steer:t.move.SteeringAngularSpeed||0, turret:f.TurretRotationSpeed||0, disp:f.Dispersion||0, aim:f.AimingSpeedFactor||1,
+    fMain:0, fAbil:0, fSumm:0, fRam:0, fAI:0};
+}
+function applyFx(b, fxs) {
+  const r = {}, a = {};
+  for (const x of fxs) { const k = MODMAP[x.m]; if (!k) continue; r[k] = (r[k]||0) + x.r * (x.w ?? 1); a[k] = (a[k]||0) + x.a * (x.w ?? 1); }
+  const s = {...b};
+  for (const k of Object.keys(MODMAP).map(m => MODMAP[m])) {
+    if (!(k in r) && !(k in a)) continue;
+    s[k] = ADDITIVE.has(k) ? b[k] + (r[k]||0) + (a[k]||0) : b[k] * (1 + (r[k]||0)) + (a[k]||0);
+  }
+  s.reload = Math.max(s.minReload, s.reload); s.mag = Math.max(1, Math.round(s.mag));
+  const cycle = s.mag > 1 ? s.reload + (s.mag - 1) * s.shell : s.reload;
+  s.dps = s.dmg * (1 + s.fMain) * s.mag * s.rate / cycle;
+  s.edps = s.dps * (1 + Math.min(1, s.crit) * (s.critMul - 1));
+  s.ehp = s.hp + s.ar;
+  const sps = s.mag / cycle;
+  s.pm = Math.max(0, s.eCost - s.eStart) / (s.epS + s.epH * sps || 1);
+  return s;
+}
+const BUFFMODE = {avg:"평균(지속 ÷ 쿨다운)", on:"발동 중(최대치)", off:"반영 안 함"};
+const OBJ = {edps:"화력: 기대 DPS", ehp:"생존: 유효 체력", pm:"파워 무브 회전", all:"종합(세 지표 합)"};
+function fxOf(item, mode) {
+  return (item?.fx || []).map(x => x.kind === "active" ? {...x, w: mode === "on" ? 1 : mode === "off" ? 0 : (x.cd ? Math.min(1, x.dur / x.cd) : 0)} : x);
+}
+function scoreOf(s, base, obj) {
+  if (obj === "edps") return s.edps; if (obj === "ehp") return s.ehp; if (obj === "pm") return -s.pm;
+  return s.edps / base.edps + s.ehp / base.ehp + base.pm / Math.max(0.1, s.pm);
+}
+const BS = {};   // 탱크별 선택 상태
+function build(id, preset) {
+  const t = TANK[id] || TANK[(Object.keys(BS)[0])] || D.tanks.filter(x => x.status === "released").sort((a, b) => b.rarity - a.rarity)[0];
+  const firstFree = () => { const used = []; return t.slots.map(s => { const p = s.find(x => !used.includes(x)) ?? s[0]; used.push(p); return p; }); };
+  const st = BS[t.id] ||= {lv: t.levels.length, enh: t.enh.length, tech: false, mode: "avg", obj: "all", slots: firstFree(), chips: []};
+  if (preset) { const p = preset.split(",").map(Number); st.slots = st.slots.map((v, i) => t.slots[i].includes(p[i]) ? p[i] : v); }
+  const partOpt = (i) => t.slots[i].map(pid => { const pt = D.parts[pid]; return `<option value="${pid}" ${st.slots[i] === pid ? "selected" : ""}>${strip(L(pt?.name)) || pid}${pt?.fx?.length ? " ●" : ""}</option>`; }).join("");
+  app.innerHTML = `<h1>빌드 시뮬레이터</h1>
+  <p class="lead">탱크를 고르고 레벨·강화·부품·칩을 바꾸면 능력치가 바로 계산됩니다. ‘최강 조합 찾기’는 고른 기준으로 모든 부품 조합을 계산해 가장 높은 것을 끼웁니다. ● 표시는 효과가 수치로 반영되는 항목입니다.</p>
+  <div class="filters"><select id="btank" aria-label="탱크 선택">${D.tanks.map(x => `<option value="${x.id}" ${x.id === t.id ? "selected" : ""}>${strip(tname(x))} (${esc(x.model)})${STATUS[x.status] ? " · " + STATUS[x.status] : ""}</option>`).join("")}</select>
+    <a href="#t/${t.id}" class="small">탱크 상세 보기</a></div>
+  <div class="bgrid">
+    <section class="panel" style="--rc:${RC[t.rarity]}">
+      <div class="row" style="gap:12px;margin-bottom:10px">${t.imgS ? `<div style="width:96px;height:96px">${IMG(t.imgS, tname(t), "shot")}</div>` : ""}<div><div style="font:26px var(--display)">${tname(t)}</div><div class="row">${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span><span class="pill">${manuname(t.manu)}</span></div></div></div>
+      <div class="ctl"><label for="blv">레벨 <output id="blvo">${st.lv}</output></label><input type="range" id="blv" min="1" max="${t.levels.length}" value="${st.lv}" style="width:100%;accent-color:var(--hazard)"></div>
+      <div class="ctl"><label for="benh">강화 단계</label><select id="benh">${[0, ...t.enh.map(e => e.lv)].map(n => `<option value="${n}" ${st.enh == n ? "selected" : ""}>+${n}${n ? " · " + strip(t.enh.filter(e => e.lv <= n).map(e => modText(e.mod)).join(", ")) : ""}</option>`).join("")}</select></div>
+      <div class="ctl"><label class="row" style="gap:6px"><input type="checkbox" id="btech" ${st.tech ? "checked" : ""} style="accent-color:var(--hazard)"> ${manuname(t.manu)} 제조사 기술 전부 최대로</label><div class="note">기술 노드마다 마지막 단계 효과를 더합니다. 노드를 다 찍을 수 없다면 실제보다 높게 나옵니다.</div></div>
+      ${t.slots.map((s, i) => `<div class="ctl"><label for="bs${i}">슬롯 ${i + 1} <span class="muted">${esc(D.slotDef[i]?.type || "")}</span></label><select id="bs${i}" data-i="${i}">${partOpt(i)}</select><div class="note" id="bsd${i}"></div></div>`).join("")}
+      <div class="ctl"><label for="bmode">발동형 효과(지속시간·쿨다운이 있는 부품)</label><select id="bmode">${Object.entries(BUFFMODE).map(([k, v]) => `<option value="${k}" ${st.mode === k ? "selected" : ""}>${v}</option>`).join("")}</select></div>
+      <div class="ctl"><span class="lab">칩 <span class="muted">(칩 광란 모드 전투 중 선택. 수치 반영되는 칩만 계산)</span></span>
+        <div class="chiplist" id="bchips">${t.chips.length ? t.chips.map(c => D.chips[c]).filter(Boolean).sort((a, b) => (b.fx.length > 0) - (a.fx.length > 0) || a.id - b.id).map(c => `<label><input type="checkbox" value="${c.id}" ${st.chips.includes(c.id) ? "checked" : ""}>${IMG(c.icon, "", "ico", 'width="26" height="26"')}<span><b>${L(c.name)}</b>${c.fx.length ? " ●" : ""} <span class="pill ${chipCls(c.rarity)}" style="font-size:11px">${CHIPR[c.rarity] || ""}</span><br><span class="muted">${L(c.desc)}</span></span></label>`).join("") : '<p class="muted small">이 탱크는 칩 풀이 없습니다.</p>'}</div></div>
+    </section>
+    <section class="sticky">
+      <div class="panel" style="margin-bottom:12px">
+        <div class="row" style="gap:8px"><select id="bobj" aria-label="최강 조합 기준" style="flex:1;background:var(--steel);border:1px solid var(--line);border-radius:8px;padding:7px 8px">${Object.entries(OBJ).map(([k, v]) => `<option value="${k}" ${st.obj === k ? "selected" : ""}>${v}</option>`).join("")}</select><button type="button" class="btn" id="bbest">최강 조합 찾기</button></div>
+        <div id="bbestout" class="small" style="margin-top:8px"></div>
+      </div>
+      <div class="panel scroll"><table class="tbl" id="bstats"></table><p class="small muted" style="margin:8px 0 0">기본 = 같은 레벨에서 강화·기술·부품·칩을 하나도 적용하지 않은 값. 수치는 클라이언트 데이터로 계산한 추정이며, 스킬·특성·조건부 효과(예: ‘정지 시’, ‘명중 시마다’)는 숫자에 넣지 않았습니다.</p></div>
+      <div class="panel" style="margin-top:12px"><h3>반영된 효과</h3><div id="bfx" class="small"></div><h3 style="margin-top:10px">수치로 계산하지 않은 효과</h3><div id="bnofx" class="small muted"></div></div>
+    </section>
+  </div>`;
+  const collect = () => {
+    const fx = [], applied = [], notq = [];
+    t.enh.filter(e => e.lv <= st.enh).forEach(e => { fx.push(...e.mod.fx); applied.push(`강화 +${e.lv}: ${modText(e.mod)}`); });
+    if (st.tech) D.tech.filter(x => x.manu === t.manu).forEach(x => { const l = x.levels[x.levels.length - 1]; if (l?.mod?.fx?.length) { fx.push(...l.mod.fx); applied.push(`기술 ${strip(L(x.name))}: ${modText(l.mod)}`); } });
+    st.slots.forEach(pid => { const pt = D.parts[pid]; if (!pt) return; const f = fxOf(pt, st.mode);
+      if (f.length) { fx.push(...f); applied.push(`${strip(L(pt.name))}: ${f.map(x => fxLabel(x)).join(", ")}`); } else notq.push(`<b>${L(pt.name)}</b> — ${L(t.pdesc[pid] || pt.desc)}`); });
+    st.chips.forEach(cid => { const c = D.chips[cid]; if (!c) return; const f = fxOf(c, st.mode);
+      if (f.length) { fx.push(...f); applied.push(`칩 ${strip(L(c.name))}: ${f.map(x => fxLabel(x)).join(", ")}`); } else notq.push(`<b>칩 ${L(c.name)}</b> — ${L(c.desc)}`); });
+    return {fx, applied, notq};
+  };
+  const baseFx = () => { const fx = []; t.enh.filter(e => e.lv <= st.enh).forEach(e => fx.push(...e.mod.fx));
+    if (st.tech) D.tech.filter(x => x.manu === t.manu).forEach(x => { const l = x.levels[x.levels.length - 1]; if (l?.mod?.fx) fx.push(...l.mod.fx); }); return fx; };
+  const draw = () => {
+    $("#blvo").textContent = st.lv;
+    t.slots.forEach((s, i) => { const pt = D.parts[st.slots[i]]; $("#bsd" + i).innerHTML = pt ? L(t.pdesc[st.slots[i]] || pt.desc) : ""; });
+    const b0 = applyFx(baseStats(t, st.lv), []);
+    const {fx, applied, notq} = collect();
+    const s = applyFx(baseStats(t, st.lv), fx);
+    const fmt = (v, d) => d === "%" ? num(v * 100, 1) + "%" : num(v, d);
+    $("#bstats").innerHTML = `<tr><th>능력치</th><th class="n">기본</th><th class="n">빌드</th><th class="n">변화</th></tr>` + STATROWS.map(([k, lab, dir, d]) => {
+      const a = b0[k], v = s[k]; if (a == null || v == null || (!a && !v && k.startsWith("f"))) return "";
+      const diff = v - a, good = dir * diff > 1e-9, bad = dir * diff < -1e-9;
+      const pct = a ? ` (${diff > 0 ? "+" : ""}${num(diff / Math.abs(a) * 100, 1)}%)` : "";
+      return `<tr><td>${lab}</td><td class="n">${fmt(a, d)}</td><td class="n"><b>${fmt(v, d)}</b></td><td class="n ${good ? "up-g" : bad ? "dn-r" : "muted"}">${Math.abs(diff) > 1e-9 ? (diff > 0 ? "+" : "") + fmt(diff, d) + (d === "%" ? "" : pct) : "–"}</td></tr>`; }).join("");
+    $("#bfx").innerHTML = applied.length ? applied.map(x => `<div>${x}</div>`).join("") : '<span class="muted">없음</span>';
+    $("#bnofx").innerHTML = notq.length ? notq.map(x => `<div style="margin-bottom:4px">${x}</div>`).join("") : "없음";
+    history.replaceState(null, "", "#build/" + t.id + "/" + st.slots.join(","));
+  };
+  const best = () => {
+    const bfx = baseFx(), chipFx = st.chips.flatMap(c => fxOf(D.chips[c], st.mode));
+    const b0 = applyFx(baseStats(t, st.lv), bfx); let res = [];
+    const rec = (i, picked) => {
+      if (i === t.slots.length) {
+        const s = applyFx(baseStats(t, st.lv), [...bfx, ...chipFx, ...picked.flatMap(p => fxOf(D.parts[p], st.mode))]);
+        res.push({picked: [...picked], score: scoreOf(s, b0, st.obj), s}); return; }
+      for (const p of t.slots[i]) { if (picked.includes(p)) continue; picked.push(p); rec(i + 1, picked); picked.pop(); }
+    };
+    rec(0, []);
+    res.sort((a, b) => b.score - a.score);
+    if (!res.length) return;
+    st.slots = res[0].picked;
+    t.slots.forEach((s, i) => { $("#bs" + i).value = st.slots[i]; });
+    const quant = new Set(res[0].picked.filter(p => D.parts[p]?.fx?.length));
+    // 칩 추천: 현재 부품 기준, 칩 1개 추가 시 점수 상승 순
+    const cur = applyFx(baseStats(t, st.lv), [...bfx, ...chipFx, ...st.slots.flatMap(p => fxOf(D.parts[p], st.mode))]);
+    const chipRank = t.chips.map(c => D.chips[c]).filter(c => c?.fx?.length && !st.chips.includes(c.id)).map(c => ({c, d: scoreOf(applyFx(baseStats(t, st.lv), [...bfx, ...chipFx, ...st.slots.flatMap(p => fxOf(D.parts[p], st.mode)), ...fxOf(c, st.mode)]), b0, st.obj) - scoreOf(cur, b0, st.obj)})).filter(x => x.d > 1e-9).sort((a, b) => b.d - a.d).slice(0, 6);
+    $("#bbestout").innerHTML = `<b>${OBJ[st.obj]}</b> 기준 ${res.length}개 조합 중 1위를 끼웠습니다.${quant.size < t.slots.length ? ` 수치로 계산되지 않는 부품 슬롯은 순위에 영향이 없으니, 아래 설명을 보고 직접 고르세요.` : ""}
+      <table class="tbl" style="margin-top:6px"><tr><th>순위</th><th>조합</th><th class="n">기대 DPS</th><th class="n">유효 체력</th><th class="n">파워 무브</th></tr>${res.filter((r, i, arr) => i === 0 || r.score !== arr[i - 1].score).slice(0, 5).map((r, i) => `<tr><td>${i + 1}</td><td class="small">${r.picked.map(p => strip(L(D.parts[p]?.name))).join(" / ")}</td><td class="n">${num(r.s.edps, 0)}</td><td class="n">${num(r.s.ehp, 0)}</td><td class="n">${num(r.s.pm, 1)}초</td></tr>`).join("")}</table>
+      ${chipRank.length ? `<p style="margin:8px 0 4px"><b>추천 칩</b> (하나씩 더했을 때 상승폭 순)</p><div class="row">${chipRank.map(x => `<span class="pill ${chipCls(x.c.rarity)}">${L(x.c.name)}</span>`).join("")}</div>` : ""}`;
+    draw();
+  };
+  $("#btank").addEventListener("input", e => { location.hash = "#build/" + e.target.value; });
+  $("#blv").addEventListener("input", e => { st.lv = +e.target.value; draw(); });
+  $("#benh").addEventListener("input", e => { st.enh = +e.target.value; draw(); });
+  $("#btech").addEventListener("input", e => { st.tech = e.target.checked; draw(); });
+  $("#bmode").addEventListener("input", e => { st.mode = e.target.value; draw(); });
+  $("#bobj").addEventListener("input", e => { st.obj = e.target.value; });
+  $("#bbest").addEventListener("click", best);
+  t.slots.forEach((s, i) => $("#bs" + i).addEventListener("input", e => { st.slots[i] = +e.target.value; draw(); }));
+  $("#bchips").addEventListener("input", e => { if (e.target.type !== "checkbox") return; const v = +e.target.value; st.chips = e.target.checked ? [...st.chips, v] : st.chips.filter(x => x !== v); draw(); });
+  draw();
+}
+function fxLabel(x) {
+  const nm = D.modifiers[x.m] ? strip(L(D.modifiers[x.m].name)) || x.m : x.m;
+  const v = x.r ? `${x.r > 0 ? "+" : ""}${num(x.r * 100, 1)}%` : (FACT.has(x.m) ? `${x.a > 0 ? "+" : ""}${num(x.a * 100, 1)}%` : `${x.a > 0 ? "+" : ""}${num(x.a, 1)}`);
+  return `${nm} ${v}${x.kind === "active" ? ` (${num(x.dur)}초/쿨 ${num(x.cd)}초${x.w != null && x.w !== 1 ? `, 가동률 ${num(x.w * 100, 0)}%` : ""})` : ""}`;
+}
+const FACT = new Set(["CritChance","CritDamageMultiplier","MainGunDamageFactor","AbilityDamageFactor","SummonDamageFactor","RamDamageFactor","DamageToAIFactor"]);
 
 // ---------- 비교 ----------
 function compare(ids) {
@@ -701,7 +865,12 @@ function modes() {
   <h2>게임 모드</h2><div class="grid g-2">${named.map(m => `<section class="panel">${m.bg ? `<img src="img/${encodeURIComponent(m.bg)}.webp" alt="" loading="lazy" style="width:100%;aspect-ratio:21/9;object-fit:cover;border-radius:6px;margin-bottom:10px;display:block">` : ""}<div class="row" style="justify-content:space-between"><h3 style="margin:0" class="row">${IMG(m.icon, L(m.name), "ico", 'width="36" height="36"')}${L(m.name) || esc(m.type)}</h3><span class="row">${m.unreleased ? '<span class="pill st-upcoming">미공개</span>' : ""}<span class="pill">${esc(m.modeType)}</span></span></div>
     <p class="small muted">${esc(m.type)} · 설정 ${m.id}</p>${m.desc.map(d => `<p class="small">${L(d)}</p>`).join("")}</section>`).join("")}</div>
   <details style="margin-top:16px"><summary>이름 없는 모드 설정 ${other.length}개 (랭크·봇·이벤트 변형)</summary><div class="panel scroll"><table class="tbl"><tr><th class="n">ID</th><th>유형</th><th>분류</th><th>게임모드 클래스</th></tr>${other.map(m => `<tr><td class="n">${m.id}</td><td>${esc(m.type)}</td><td>${esc(m.modeType)}</td><td class="mono">${esc(m.cls)}</td></tr>`).join("")}</table></div></details>
-  <h2>맵</h2><div class="grid g-3">${D.maps.map(m => `<div class="mapcard">${m.bg ? `<img src="img/${encodeURIComponent(m.bg)}.webp" alt="${esc(strip(L(m.name)))}" loading="lazy" data-zoom="${esc(m.bg)}" data-cap="${esc(strip(L(m.name) || m.path))}" style="cursor:zoom-in">` : `<div style="aspect-ratio:16/9;background:var(--steel)"></div>`}
+  <h2>하늘에서 본 맵 <span class="small muted">전투 미니맵 원본 · 누르면 크게 보기</span></h2>
+  <div class="grid g-3">${D.maps.filter((m, i, arr) => m.mini && /minimap/i.test(m.mini) && m.name && arr.findIndex(x => x.mini === m.mini && x.name) === i).map(m => `<button type="button" class="mapcard" style="padding:0;cursor:zoom-in;text-align:left;font:inherit;color:inherit" data-zoom="${esc(m.mini)}" data-cap="${esc(strip(L(m.name) || m.path))}">
+    <div class="row" style="gap:0;flex-wrap:nowrap"><img src="img/${encodeURIComponent(m.mini)}.webp" alt="${esc(strip(L(m.name) || m.path))} 미니맵" loading="lazy" style="width:50%;aspect-ratio:1;object-fit:contain;background:#0e1820">${m.bg ? `<img src="img/${encodeURIComponent(m.bg)}.webp" alt="" loading="lazy" style="width:50%;aspect-ratio:1;object-fit:cover">` : ""}</div>
+    <div class="in"><b>${L(m.name) || esc(m.path)}</b><div class="small muted mono">${esc(m.path)}</div></div></button>`).join("")}</div>
+  <p class="small muted">거울 호수(징저우)·NewMode·Stadium 맵은 이 빌드에 레벨 데이터가 없어 미니맵도 없습니다(추가 다운로드 또는 미공개).</p>
+  <h2>맵 목록</h2><div class="grid g-3">${D.maps.map(m => `<div class="mapcard">${m.bg ? `<img src="img/${encodeURIComponent(m.bg)}.webp" alt="${esc(strip(L(m.name)))}" loading="lazy" data-zoom="${esc(m.bg)}" data-cap="${esc(strip(L(m.name) || m.path))}" style="cursor:zoom-in">` : `<div style="aspect-ratio:16/9;background:var(--steel)"></div>`}
     <div class="in"><div class="row" style="justify-content:space-between"><b>${L(m.name) || '<span class="muted">이름 없음</span>'}</b>${m.mini ? `<button type="button" class="pill" style="cursor:zoom-in;background:none" data-zoom="${esc(m.mini)}" data-cap="${esc(strip(L(m.name) || m.path))} 미니맵">미니맵</button>` : ""}</div>
     <div class="small muted">${m.id} · <span class="mono">${esc(m.path)}</span></div>
     <div class="row" style="margin-top:4px">${m.disabled ? '<span class="pill hid">비활성</span>' : ""}${!m.name && /NewMode|Stadium|Gym/.test(m.path) ? '<span class="pill st-upcoming">미공개 추정</span>' : ""}${!m.name && !/NewMode|Stadium|Gym/.test(m.path) ? '<span class="pill">변형</span>' : ""}</div></div></div>`).join("")}</div>
@@ -796,7 +965,19 @@ function gallery(group) {
 const tcache = {};
 function data(name) {
   if (!name) {
-    app.innerHTML = `<h1>원본 데이터</h1><p class="lead">클라이언트 DataTable ${D.tables.length}개를 필드 이름 그대로 보여줍니다. 텍스트 키는 한국어로 바꿨고, 에셋 경로는 파일 이름만 남겼습니다.</p>
+    app.innerHTML = `<h1>원본 데이터</h1><p class="lead">클라이언트 DataTable과 능력 데이터(DA)를 필드 이름 그대로 보여줍니다. 텍스트 키는 한국어로 바꿨고, 에셋 경로는 파일 이름만 남겼습니다.</p>
+    <details class="panel" style="margin-top:14px"><summary><b>추출 현황</b> — 무엇을 읽었고 무엇이 남았는지</summary>
+      <table class="tbl small"><tr><th>대상</th><th>상태</th><th>비고</th></tr>
+      <tr><td>DataTable 130개</td><td class="up-g">121개 수치까지 해석</td><td>남은 9개는 UI 카메라·이미지 스타일(도감과 무관)</td></tr>
+      <tr><td>능력 데이터 DA 280개</td><td class="up-g">217개 해석</td><td>부품·칩·스킬 설명의 빈칸을 채우고 시뮬레이터에 씀. 나머지 63개는 구조를 확신할 수 없어 비워 둠</td></tr>
+      <tr><td>현지화 12개 언어</td><td class="up-g">전부</td><td>한국어·영어 사용</td></tr>
+      <tr><td>UI 이미지</td><td class="up-g">2,607장</td><td>탱크·스킨 렌더, 아이콘, 오퍼레이터, 맵·미니맵 15장</td></tr>
+      <tr><td>게임플레이 효과 GE 344개</td><td>건너뜀</td><td>수치는 대부분 DA에서 넘겨받는 구조(SetByCaller)라 새 숫자가 거의 없음</td></tr>
+      <tr><td>능력 블루프린트 GA 202개</td><td>건너뜀</td><td>블루프린트 로직·기본값. 조건부 효과(정지 시, 명중마다 등)의 세부 규칙이 여기 있음</td></tr>
+      <tr><td>맵 레벨 209개</td><td>건너뜀</td><td>3D 지형 데이터. 거울 호수·NewMode 등은 이 빌드에 없음</td></tr>
+      <tr><td>3D 모델·사운드·이펙트</td><td>넣지 않음</td><td>용량·권리 문제</td></tr>
+      <tr><td>설정 파일(ini)</td><td>대부분 비어 있음</td><td>배포 빌드가 비워서 배포. 서버 주소가 있는 엔진 설정은 공개하지 않음</td></tr>
+      <tr><td>가격·확률·이벤트 일정</td><td>클라이언트에 없음</td><td>서버가 내려주는 값</td></tr></table></details>
     <div class="filters"><input type="search" id="q" placeholder="테이블 이름 검색" aria-label="검색"><span class="count" id="cnt"></span></div><div class="grid g-3" id="list"></div>`;
     const draw = () => { const q = $("#q").value.trim().toLowerCase(); const ls = D.tables.filter(t => !q || (t.name + t.struct).toLowerCase().includes(q));
       $("#cnt").textContent = ls.length + "개";
