@@ -142,6 +142,37 @@ code,.mono{font:13px/1.5 ui-monospace,Menlo,monospace;color:var(--ink-2);word-br
 .up a{display:block;text-decoration:none;background:rgba(0,0,0,.18);border-radius:8px;padding:12px}
 .up a:hover{background:rgba(0,0,0,.3)}
 
+/* 이미지 */
+.shot{display:block;width:100%;height:100%;object-fit:contain}
+.stage{position:relative;background:radial-gradient(ellipse at 50% 70%,color-mix(in srgb,var(--rc) 28%,transparent),transparent 70%),var(--steel);border-radius:8px;overflow:hidden}
+.tcard .stage{height:150px;margin:-2px -2px 10px}
+.tcard .stage img{padding:8px 10px 2px}
+.dhead .stage{width:min(460px,100%);aspect-ratio:4/3}
+.dhead .stage img{padding:14px}
+.ico{flex:none;object-fit:contain;border-radius:6px}
+.ability .ttl .ico{width:40px;height:40px;align-self:center}
+.panel .ico.lg{width:64px;height:64px;float:right;margin:0 0 6px 10px}
+.skins{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.skin{background:var(--steel-2);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:left;cursor:zoom-in;font:inherit;color:inherit}
+.skin:hover{border-color:var(--ink-3)}
+.skin .stage{aspect-ratio:1;margin-bottom:6px}
+.skin b{display:block;font-size:14px;line-height:1.3}
+.skin span{font-size:12px;color:var(--ink-3)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.thumb{background:var(--steel-2);border:1px solid var(--line);border-radius:8px;padding:6px;cursor:zoom-in;font:inherit;color:inherit;text-align:left}
+.thumb img{width:100%;aspect-ratio:1;object-fit:contain;display:block;background:var(--steel);border-radius:5px}
+.thumb span{display:block;font-size:11.5px;line-height:1.3;margin-top:4px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mapcard{background:var(--steel-2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.mapcard img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--steel)}
+.mapcard .in{padding:10px 12px}
+.op-av{width:100%;max-height:340px;object-fit:contain;object-position:bottom;display:block;margin-bottom:8px}
+dialog.lb{border:1px solid var(--line);background:var(--steel-2);color:var(--ink);border-radius:12px;padding:14px;max-width:min(92vw,820px)}
+dialog.lb::backdrop{background:rgba(8,14,20,.78)}
+dialog.lb img{max-width:100%;max-height:72vh;display:block;margin:0 auto}
+dialog.lb p{margin:10px 0 0;text-align:center}
+dialog.lb button{position:absolute;top:8px;right:10px;background:var(--steel-3);border:0;border-radius:6px;padding:4px 10px;cursor:pointer}
+td img.cell{width:44px;height:44px;object-fit:contain;vertical-align:middle;background:var(--steel);border-radius:4px}
+
 footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:13px;padding:22px 0 40px}
 footer p{max-width:80ch}
 
@@ -180,14 +211,16 @@ footer p{max-width:80ch}
       <a href="#modes">모드·맵</a>
       <a href="#growth">성장·보상</a>
       <a href="#hidden" class="warn">미공개·출시 예정</a>
+      <a href="#gallery">이미지</a>
       <a href="#data">원본 데이터</a>
     </nav>
   </div>
 </header>
 <main class="wrap" id="app" tabindex="-1"></main>
+<dialog class="lb" id="lb"><button type="button" id="lbx">닫기</button><img id="lbimg" alt=""><p id="lbcap"></p></dialog>
 <footer>
   <div class="wrap">
-    <p>비공식 팬 사이트입니다. 게임 이름과 콘텐츠의 권리는 개발사와 각 권리자에게 있습니다. 게임 이미지·사운드는 담지 않았고, 클라이언트에 들어 있는 수치·텍스트만 정리했습니다.</p>
+    <p>비공식 팬 사이트입니다. 게임 이름·이미지·텍스트 등 콘텐츠의 권리는 개발사와 각 권리자에게 있으며, 이미지는 게임 클라이언트에 들어 있는 UI 이미지를 그대로 옮긴 것입니다.</p>
     <p id="buildinfo"></p>
     <p>‘출시 예정’ 표시는 번역 유무·스킨·칩 구성으로 판단한 추정입니다. 실제 출시 일정과 다를 수 있고, 서버 쪽 설정(가격·확률·이벤트)은 반영되지 않습니다.</p>
   </div>
@@ -251,6 +284,28 @@ function tankSvg(t, w=86) {
     ${[0,1,2,3,4].map(i => `<circle cx="${hx+8+i*(hw-16)/4}" cy="${hy+hh+2.5}" r="2.2" fill="${c}" fill-opacity=".6"/>`).join("")}
   </svg>`;
 }
+// 게임 이미지
+const IMG = (n, alt="", cls="ico", size="") => n ? `<img class="${cls}" src="img/${encodeURIComponent(n)}.webp" alt="${esc(strip(alt))}" loading="lazy" decoding="async" ${size}>` : "";
+function tankShot(t, w=200) {
+  return t.img ? `<div class="stage" style="--rc:${RC[t.rarity]}">${IMG(t.img, tname(t), "shot")}</div>` : tankSvg(t, w);
+}
+// 클릭하면 크게 보기: data-zoom="이미지이름" data-cap="설명"
+document.addEventListener("click", e => {
+  const z = e.target.closest("[data-zoom]"); if (!z) return;
+  $("#lbimg").src = "img/" + encodeURIComponent(z.dataset.zoom) + ".webp"; $("#lbimg").alt = z.dataset.cap || "";
+  $("#lbcap").innerHTML = (z.dataset.cap ? esc(z.dataset.cap) + "<br>" : "") + `<span class="muted small">${esc(z.dataset.zoom)}</span>`;
+  $("#lb").showModal();
+});
+$("#lbx").addEventListener("click", () => $("#lb").close());
+$("#lb").addEventListener("click", e => { if (e.target === $("#lb")) $("#lb").close(); });
+function skinCard(s) {
+  const cap = strip(L(s.name) || String(s.id));
+  const pic = s.big || s.small;
+  return `<button type="button" class="skin" ${pic ? `data-zoom="${esc(s.big || s.small)}" data-cap="${esc(cap)}"` : ""}>
+    <div class="stage" style="--rc:${s.kind === "legendary" ? "var(--r4)" : s.kind === "epic" || s.kind === "season" ? "var(--r3)" : s.kind === "event" ? "var(--r2)" : "var(--r1)"}">${IMG(s.small || s.big, cap, "shot")}</div>
+    <b>${L(s.name) || s.id}</b><span>${SKINKIND[s.kind]} · ${s.cost ? costs(s.cost) : "기본"}${s.hidden ? ' · <em style="color:var(--danger);font-style:normal">숨김</em>' : ""}${s.fx ? " · 로비 이펙트" : ""}</span></button>`;
+}
+
 function spark(pts, w=260, h=64) {
   if (!pts || pts.length < 2) return "";
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
@@ -261,7 +316,7 @@ function spark(pts, w=260, h=64) {
 }
 
 // ---------- 라우터 ----------
-const ROUTES = {"": home, tanks, t: tankDetail, compare, skills, parts, chips, operators, skins, modes, growth, hidden, data};
+const ROUTES = {"": home, tanks, t: tankDetail, compare, skills, parts, chips, operators, skins, modes, growth, hidden, gallery, data};
 let lastRoute = null;
 function render() {
   const h = decodeURIComponent(location.hash.slice(1));
@@ -291,7 +346,7 @@ function home() {
       <h1>탱크 30대, 그 안의 숫자 전부</h1>
       <p class="lead">게임 화면에서는 ‘공격력 높음’ 정도로만 보이는 값을 실제 수치로 풀었습니다. 레벨별 내구도와 피해량, 재장전과 분산, 엔진 곡선, 부품과 칩, 그리고 아직 나오지 않은 탱크와 모드까지 클라이언트 ${esc(D.build.version)} 빌드에서 그대로 읽었습니다.</p>
     </div>
-    <div class="lineup" aria-hidden="true">${lineup.map((t,i) => `<span style="animation-delay:${i*40}ms;display:inline-block">${tankSvg(t, 64 + (t.type==="HeavyTank"?12:0))}</span>`).join("")}</div>
+    <div class="lineup" aria-hidden="true">${lineup.map((t,i) => `<span style="animation-delay:${i*40}ms;display:inline-block;flex:none">${t.imgQ ? IMG(t.imgQ, "", "ico", 'width="96" height="96"') : tankSvg(t, 80)}</span>`).join("")}</div>
   </section>
   <div class="facts">
     <a href="#tanks"><b>${D.tanks.length}</b><span>탱크</span></a>
@@ -299,6 +354,7 @@ function home() {
     <a href="#chips"><b>${Object.keys(D.chips).length}</b><span>칩</span></a>
     <a href="#skins"><b>${Object.keys(D.skins).length}</b><span>스킨</span></a>
     <a href="#modes"><b>${D.modes.length}</b><span>모드 설정</span></a>
+    <a href="#gallery"><b>${D.gallery.reduce((a, g) => a + g[2], 0).toLocaleString("ko-KR")}</b><span>게임 이미지</span></a>
     <a href="#data"><b>${D.tables.length}</b><span>원본 테이블</span></a>
   </div>
 
@@ -306,7 +362,7 @@ function home() {
   <div class="hazard-box"><div class="tape"></div><div class="in">
     <p class="muted">클라이언트에는 들어 있지만 게임에서 아직 보이지 않거나, 한국어 번역이 빠진 콘텐츠입니다.</p>
     <div class="up">
-      ${up.map(t => `<a href="#t/${t.id}"><div class="row">${stPill(t)}${rPill(t.rarity)}</div>
+      ${up.map(t => `<a href="#t/${t.id}">${t.img ? `<div style="height:110px;margin-bottom:8px">${tankShot(t)}</div>` : ""}<div class="row">${stPill(t)}${rPill(t.rarity)}</div>
         <div style="font:22px/1.2 var(--display);margin-top:6px">${tname(t)}</div>
         <div class="small muted">${esc(t.model)} · ${typename(t.type)} · ${manuname(t.manu)}</div>
         <div class="small" style="margin-top:4px">${t.why.map(esc).join(", ")}</div></a>`).join("")}
@@ -357,7 +413,8 @@ function drawTanks() {
   $("#cnt").textContent = `${list.length}대`;
   $("#list").innerHTML = list.map(t => { const l = lvRow(t, MAXLV); return `
     <a class="tcard" href="#t/${t.id}" style="--rc:${RC[t.rarity]}">
-      <div class="top">${tankSvg(t, 74)}<div><div class="nm">${tname(t)}</div><div class="md">${esc(t.model)} · ${typename(t.type)}</div></div></div>
+      ${t.img ? tankShot(t) : ""}
+      <div class="top">${t.img ? "" : tankSvg(t, 74)}<div><div class="nm">${tname(t)}</div><div class="md">${esc(t.model)} · ${typename(t.type)}</div></div></div>
       <div class="row badges">${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span><span class="pill">${manuname(t.manu)}</span>${stPill(t)}</div>
       <div class="stats"><div><b>${num(l.hp)}</b><span>내구도</span></div><div><b>${num(l.dmg)}</b><span>피해량</span></div><div><b>${num(t.fire.ClipReloadTime)}초</b><span>재장전</span></div></div>
     </a>`; }).join("") || `<div class="empty">조건에 맞는 탱크가 없습니다. 필터를 줄여 보세요.</div>`;
@@ -377,7 +434,7 @@ function tankDetail(id) {
   app.innerHTML = `
   <div class="crumbs"><a href="#tanks">탱크</a> / ${tname(t)}</div>
   <section class="dhead" style="--rc:${RC[t.rarity]}">
-    ${tankSvg(t, 200)}
+    ${t.img ? `<div class="stage" data-zoom="${esc(t.img)}" data-cap="${esc(strip(tname(t)))}" style="cursor:zoom-in">${IMG(t.img, tname(t), "shot")}</div>` : tankSvg(t, 200)}
     <div>
       <div class="row">${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span><span class="pill">${typename(t.type)}</span><span class="pill">${manuname(t.manu)}</span>${stPill(t)}</div>
       <div class="nm" style="margin-top:8px">${tname(t)}</div>
@@ -389,9 +446,9 @@ function tankDetail(id) {
 
   <div class="grid g-2" style="margin-top:26px">
     <section class="panel" style="--rc:${RC[t.rarity]}">
-      <div class="ability"><div class="ttl"><span class="pill">파워 무브</span><b>${L(t.skill.name) || "–"}</b></div><p>${L(t.skill.desc) || '<span class="muted">설명 없음</span>'}</p>${t.skill.ability ? `<div class="small muted">능력 에셋 ${esc(t.skill.ability)}</div>` : ""}</div>
-      <div class="ability"><div class="ttl"><span class="pill">고유 특성</span><b>${L(t.trait.name) || "–"}</b></div><p>${L(t.trait.desc) || '<span class="muted">설명 없음</span>'}</p>${t.trait.ability ? `<div class="small muted">능력 에셋 ${esc(t.trait.ability)}</div>` : ""}</div>
-      ${w ? `<div class="ability"><div class="ttl"><span class="pill">주무장</span><b>${L(w.name)}</b><span class="small muted">${esc(w.type)}</span></div><p>${L(w.desc)}</p></div>` : ""}
+      <div class="ability"><div class="ttl">${IMG(t.skillIcon, t.skill.name && L(t.skill.name))}<span class="pill">파워 무브</span><b>${L(t.skill.name) || "–"}</b></div><p>${L(t.skill.desc) || '<span class="muted">설명 없음</span>'}</p>${t.skill.ability ? `<div class="small muted">능력 에셋 ${esc(t.skill.ability)}</div>` : ""}</div>
+      <div class="ability"><div class="ttl">${IMG(t.traitIcon, t.trait.name && L(t.trait.name))}<span class="pill">고유 특성</span><b>${L(t.trait.name) || "–"}</b></div><p>${L(t.trait.desc) || '<span class="muted">설명 없음</span>'}</p>${t.trait.ability ? `<div class="small muted">능력 에셋 ${esc(t.trait.ability)}</div>` : ""}</div>
+      ${w ? `<div class="ability"><div class="ttl">${IMG(w.icon, L(w.name))}<span class="pill">주무장</span><b>${L(w.name)}</b><span class="small muted">${esc(w.type)}</span></div><p>${L(w.desc)}</p></div>` : ""}
     </section>
     <section class="panel" style="--rc:${RC[t.rarity]}">
       <h3>레벨별 능력치</h3>
@@ -470,15 +527,15 @@ function tankDetail(id) {
 
   <h2>부품 슬롯</h2>
   <p class="muted small">슬롯마다 하나를 골라 장착합니다. 해제 비용은 크레딧 기준입니다.</p>
-  <div class="grid g-3">${t.slots.map((s, i) => `<div class="slot"><h3>슬롯 ${i+1} <span class="small muted">${esc(D.slotDef[i]?.type || "")}</span></h3>${s.map(pid => { const pt = D.parts[pid]; return pt ? `<div class="opt"><b>${L(pt.name) || esc(pt.key)}</b><div class="small">${L(pt.desc)}</div><div class="small muted">${costs(pt.cost)}${pt.ability ? " · " + esc(pt.ability) : ""}</div></div>` : `<div class="opt muted">#${pid}</div>`; }).join("")}</div>`).join("") || '<p class="muted">부품 정보 없음</p>'}</div>
+  <div class="grid g-3">${t.slots.map((s, i) => `<div class="slot"><h3>슬롯 ${i+1} <span class="small muted">${esc(D.slotDef[i]?.type || "")}</span></h3>${s.map(pid => { const pt = D.parts[pid]; return pt ? `<div class="opt">${IMG(pt.icon, L(pt.name), "ico", 'width="40" height="40" style="float:right;margin-left:8px"')}<b>${L(pt.name) || esc(pt.key)}</b><div class="small">${L(pt.desc)}</div><div class="small muted">${costs(pt.cost)}${pt.ability ? " · " + esc(pt.ability) : ""}</div></div>` : `<div class="opt muted">#${pid}</div>`; }).join("")}</div>`).join("") || '<p class="muted">부품 정보 없음</p>'}</div>
 
   ${t.enh.length ? `<h2>강화 단계</h2><div class="panel scroll"><table class="tbl"><tr><th>단계</th><th>효과</th></tr>${t.enh.map(x => `<tr><td>+${x.lv}</td><td>${modText(x.mod)}</td></tr>`).join("")}</table></div>` : ""}
 
   <h2>사용 가능한 칩 <span class="small muted">${t.chips.length}개</span></h2>
-  ${t.chips.length ? `<div class="row">${t.chips.map(c => { const ch = D.chips[c]; return ch ? `<a href="#chips/${c}" class="pill ${chipCls(ch.rarity)}" style="text-decoration:none">${L(ch.name) || c}</a>` : ""; }).join("")}</div>` : '<p class="muted">칩 풀이 지정되지 않았습니다.</p>'}
+  ${t.chips.length ? `<div class="row">${t.chips.map(c => { const ch = D.chips[c]; return ch ? `<a href="#chips/${c}" class="pill ${chipCls(ch.rarity)}" style="text-decoration:none;padding-left:3px">${IMG(ch.icon, "", "ico", 'width="22" height="22"')}${L(ch.name) || c}</a>` : ""; }).join("")}</div>` : '<p class="muted">칩 풀이 지정되지 않았습니다.</p>'}
 
-  <h2>스킨 <span class="small muted">${t.skins.length}개</span></h2>
-  <div class="scroll panel"><table class="tbl"><tr><th>이름</th><th>종류</th><th class="n">가격</th><th>비고</th></tr>${t.skins.map(sid => { const s = D.skins[sid]; return `<tr><td>${L(s.name) || sid}</td><td>${SKINKIND[s.kind]}</td><td class="n">${s.cost ? costs(s.cost) : "기본"}</td><td>${s.hidden ? '<span class="pill hid">숨김</span> ' : ""}${s.fx ? '<span class="pill">로비 이펙트</span>' : ""}</td></tr>`; }).join("")}</table></div>
+  <h2>스킨 <span class="small muted">${t.skins.length}개 · 누르면 크게 보기</span></h2>
+  <div class="skins">${t.skins.map(sid => D.skins[sid]).sort((a,b) => a.order - b.order).map(skinCard).join("")}</div>
 
   <h2>게임에서 볼 수 없는 값</h2>
   <div class="panel"><dl class="kv">
@@ -521,7 +578,7 @@ function compare(ids) {
   ];
   const draw = () => {
     const ts = sel.map(i => TANK[i]);
-    $("#cmp").innerHTML = `<table class="tbl"><tr><th></th>${ts.map(t => `<th style="color:${RC[t.rarity]}"><a href="#t/${t.id}">${tname(t)}</a><div class="small muted">${rolename(t.role)} · ${typename(t.type)}</div></th>`).join("")}</tr>
+    $("#cmp").innerHTML = `<table class="tbl"><tr><th></th>${ts.map(t => `<th style="color:${RC[t.rarity]}">${t.imgS ? `<div style="width:110px;height:110px">${IMG(t.imgS, tname(t), "shot")}</div>` : ""}<a href="#t/${t.id}">${tname(t)}</a><div class="small muted">${rolename(t.role)} · ${typename(t.type)}</div></th>`).join("")}</tr>
       <tr><td class="muted">파워 무브</td>${ts.map(t => `<td>${L(t.skill.name)}</td>`).join("")}</tr>
       <tr><td class="muted">고유 특성</td>${ts.map(t => `<td>${L(t.trait.name)}</td>`).join("")}</tr>
       ${ROWS.map(([lab, f, dir]) => { const vs = ts.map(f); const best = dir ? (dir > 0 ? Math.max(...vs.filter(v=>v!=null)) : Math.min(...vs.filter(v=>v!=null))) : null;
@@ -547,9 +604,9 @@ function skills() {
     const q = $("#q").value.trim().toLowerCase();
     const ts = D.tanks.filter(t => !q || strip([L(t.name), L(t.skill.name), L(t.skill.desc), L(t.trait.name), L(t.trait.desc), t.model].join(" ")).toLowerCase().includes(q));
     $("#cnt").textContent = ts.length + "대";
-    $("#list").innerHTML = ts.map(t => `<section class="panel" style="--rc:${RC[t.rarity]}"><div class="row" style="justify-content:space-between"><a href="#t/${t.id}" style="font:20px var(--display);text-decoration:none">${tname(t)}</a><span class="row">${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span>${stPill(t)}</span></div>
-      <div class="ability" style="margin-top:10px"><div class="ttl"><span class="pill">파워 무브</span><b>${L(t.skill.name)}</b></div><p class="small">${L(t.skill.desc)}</p></div>
-      <div class="ability" style="margin-bottom:0"><div class="ttl"><span class="pill">특성</span><b>${L(t.trait.name)}</b></div><p class="small">${L(t.trait.desc)}</p></div></section>`).join("");
+    $("#list").innerHTML = ts.map(t => `<section class="panel" style="--rc:${RC[t.rarity]}"><div class="row" style="justify-content:space-between"><a href="#t/${t.id}" class="row" style="font:20px var(--display);text-decoration:none">${IMG(t.imgQ, "", "ico", 'width="44" height="44"')}${tname(t)}</a><span class="row">${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span>${stPill(t)}</span></div>
+      <div class="ability" style="margin-top:10px"><div class="ttl">${IMG(t.skillIcon, L(t.skill.name))}<span class="pill">파워 무브</span><b>${L(t.skill.name)}</b></div><p class="small">${L(t.skill.desc)}</p></div>
+      <div class="ability" style="margin-bottom:0"><div class="ttl">${IMG(t.traitIcon, L(t.trait.name))}<span class="pill">특성</span><b>${L(t.trait.name)}</b></div><p class="small">${L(t.trait.desc)}</p></div></section>`).join("");
   };
   $("#q").addEventListener("input", draw); draw();
 }
@@ -574,7 +631,7 @@ function parts() {
     $("#list").innerHTML = order.filter(g => !gs || g === gs).map(g => {
       const items = groups[g].filter(p => !q || strip(L(p.name) + " " + L(p.desc) + " " + p.ability).toLowerCase().includes(q)); n += items.length;
       if (!items.length) return "";
-      return `<h2 style="font-size:21px">${esc(gname(g))} <span class="small muted">${items.length}</span></h2><div class="grid g-3">${items.map(p => `<div class="panel"><h3>${L(p.name) || `<span class="muted">${esc(p.key)}</span>`}</h3><p class="small">${L(p.desc)}</p><p class="small muted" style="margin:0">${costs(p.cost)}${p.ability ? " · " + esc(p.ability) : ""}</p></div>`).join("")}</div>`;
+      return `<h2 style="font-size:21px">${esc(gname(g))} <span class="small muted">${items.length}</span></h2><div class="grid g-3">${items.map(p => `<div class="panel">${IMG(p.icon, L(p.name), "ico lg")}<h3>${L(p.name) || `<span class="muted">${esc(p.key)}</span>`}</h3><p class="small">${L(p.desc)}</p><p class="small muted" style="margin:0">${costs(p.cost)}${p.ability ? " · " + esc(p.ability) : ""}</p></div>`).join("")}</div>`;
     }).join("") || '<div class="empty">검색 결과가 없습니다.</div>';
     $("#cnt").textContent = n + "개";
   };
@@ -594,7 +651,7 @@ function chips(focus) {
     const q = $("#q").value.trim().toLowerCase(), r = $("#r").value, tg = $("#tg").value;
     const ls = list.filter(c => (!r || c.rarity === r) && (!tg || c.tags.includes(tg)) && (!q || strip(L(c.name) + " " + L(c.desc)).toLowerCase().includes(q))).sort((a,b) => a.id - b.id);
     $("#cnt").textContent = ls.length + "개";
-    $("#list").innerHTML = ls.map(c => `<div class="panel" id="chip-${c.id}" ${String(c.id)===focus?'style="outline:2px solid var(--hazard)"':""}><div class="row" style="justify-content:space-between"><h3 style="margin:0">${L(c.name) || c.id}</h3>${c.rarity ? `<span class="pill ${chipCls(c.rarity)}">${CHIPR[c.rarity]}</span>` : '<span class="pill st-upcoming">테이블 없음</span>'}</div>
+    $("#list").innerHTML = ls.map(c => `<div class="panel" id="chip-${c.id}" ${String(c.id)===focus?'style="outline:2px solid var(--hazard)"':""}><div class="row" style="justify-content:space-between"><h3 style="margin:0" class="row">${IMG(c.icon, L(c.name), "ico", 'width="52" height="52"')}${L(c.name) || c.id}</h3>${c.rarity ? `<span class="pill ${chipCls(c.rarity)}">${CHIPR[c.rarity]}</span>` : '<span class="pill st-upcoming">테이블 없음</span>'}</div>
       <p class="small" style="margin-top:6px">${L(c.desc)}</p>
       <div class="row">${c.tags.map(t => `<span class="pill">${esc(tagname(t))}</span>`).join("")}</div>
       <p class="small muted" style="margin:8px 0 0">${c.tanks.length ? `사용 탱크 ${c.tanks.length}대` : "사용 탱크 없음"}${c.tanks.length && c.tanks.length < 8 ? ": " + c.tanks.map(i => strip(tname(TANK[i]))).join(", ") : ""}</p></div>`).join("");
@@ -607,12 +664,14 @@ function chips(focus) {
 // ---------- 오퍼레이터 ----------
 function operators() {
   app.innerHTML = `<h1>오퍼레이터</h1><p class="lead">전투에 동행하는 오퍼레이터입니다. 프로필, 고유 스킬, 레벨업 특전을 모았습니다.</p>
-  <div class="grid g-2">${D.operators.sort((a,b)=>a.id-b.id).map(o => `<section class="panel">
-    <div class="row" style="justify-content:space-between"><span style="font:28px var(--display)">${L(o.name)}</span>${o.hidden ? '<span class="pill hid">숨김</span>' : ""}</div>
+  <div class="grid g-3">${D.operators.sort((a,b)=>a.id-b.id).map(o => `<section class="panel">
+    ${o.avatar ? `<div class="stage" style="--rc:var(--r2);cursor:zoom-in" data-zoom="${esc(o.avatar)}" data-cap="${esc(strip(L(o.full)))}">${IMG(o.avatar, L(o.name), "op-av")}</div>` : ""}
+    ${o.story ? `<button type="button" class="pill" style="cursor:zoom-in;background:none;margin-top:8px" data-zoom="${esc(o.story)}" data-cap="${esc(strip(L(o.name)))} 스토리 사진">스토리 사진 보기</button>` : ""}
+    <div class="row" style="justify-content:space-between;margin-top:8px"><span style="font:28px var(--display)">${L(o.name)}</span>${o.hidden ? '<span class="pill hid">숨김</span>' : ""}</div>
     <p class="muted">${L(o.full)}</p>
     <dl class="kv"><dt>출생</dt><dd>${L(o.born)||"–"}</dd><dt>나이</dt><dd>${L(o.age)||"–"}</dd><dt>전문 분야</dt><dd>${L(o.spec)||"–"}</dd><dt>취미</dt><dd>${L(o.hobby)||"–"}</dd><dt>레벨 단계</dt><dd>${o.levels}</dd><dt>해제 비용</dt><dd>${costs(o.unlock)}</dd><dt>전투 대사 트리거</dt><dd>${o.dialogs}종</dd></dl>
     ${o.career ? `<details style="margin-top:10px"><summary>경력</summary><p class="small">${L(o.career)}</p></details>` : ""}
-    <div class="ability" style="--rc:var(--hazard);margin-top:12px"><div class="ttl"><span class="pill">스킬</span><b>${L(o.skill.name)}</b></div><p class="small">${L(o.skill.desc)}</p></div>
+    <div class="ability" style="--rc:var(--hazard);margin-top:12px"><div class="ttl">${IMG((o.items.find(i => i.icon) || {}).icon, L(o.skill.name))}<span class="pill">스킬</span><b>${L(o.skill.name)}</b></div><p class="small">${L(o.skill.desc)}</p></div>
     <h3>특전</h3>${o.perks.map(p => `<div class="small" style="padding:5px 0;border-top:1px dashed var(--line)"><b>${L(p.name) || '<span class="muted">이름 없음(미번역)</span>'}</b> ${L(p.desc)}</div>`).join("")}
   </section>`).join("")}</div>`;
 }
@@ -624,12 +683,13 @@ function skins() {
   <div class="filters"><input type="search" id="q" placeholder="스킨 이름 검색" aria-label="검색">
   <select id="tk" aria-label="탱크"><option value="">탱크: 전체</option>${D.tanks.map(t => `<option value="${t.id}">${strip(tname(t))}</option>`).join("")}</select>
   <select id="kd" aria-label="종류"><option value="">종류: 전체</option>${Object.entries(SKINKIND).map(([k,v]) => `<option value="${k}">${v}</option>`).join("")}</select>
-  <select id="hd" aria-label="노출"><option value="">노출: 전체</option><option value="1">숨김만</option><option value="0">노출만</option></select><span class="count" id="cnt"></span></div><div class="panel scroll"><table class="tbl" id="list"></table></div>`;
+  <select id="hd" aria-label="노출"><option value="">노출: 전체</option><option value="1">숨김만</option><option value="0">노출만</option></select><span class="count" id="cnt"></span></div><div id="list"></div>`;
   const draw = () => {
     const q = $("#q").value.trim().toLowerCase(), tk = $("#tk").value, kd = $("#kd").value, hd = $("#hd").value;
     const ls = all.filter(s => (!tk || s.tank == tk) && (!kd || s.kind === kd) && (!hd || String(+s.hidden) === hd) && (!q || strip(L(s.name) + " " + L(s.desc)).toLowerCase().includes(q))).sort((a,b) => a.tank - b.tank || a.order - b.order);
     $("#cnt").textContent = ls.length + "개";
-    $("#list").innerHTML = `<tr><th>스킨</th><th>탱크</th><th>종류</th><th class="n">가격</th><th>설명</th></tr>` + ls.map(s => `<tr><td><b>${L(s.name) || s.id}</b> ${s.hidden ? '<span class="pill hid">숨김</span>' : ""}${s.fx ? ' <span class="pill">로비 이펙트</span>' : ""}</td><td>${TANK[s.tank] ? `<a href="#t/${s.tank}">${tname(TANK[s.tank])}</a>` : s.tank}</td><td>${SKINKIND[s.kind]}</td><td class="n">${s.cost ? costs(s.cost) : "기본"}</td><td class="small">${L(s.desc)}</td></tr>`).join("");
+    const byTank = {}; ls.forEach(s => (byTank[s.tank] ||= []).push(s));
+    $("#list").innerHTML = Object.entries(byTank).map(([tid, ss]) => `<h2 style="font-size:21px">${TANK[tid] ? `<a href="#t/${tid}" style="text-decoration:none">${tname(TANK[tid])}</a> <span class="small muted">${esc(TANK[tid].model)}</span>` : tid} <span class="small muted">${ss.length}</span></h2><div class="skins">${ss.map(skinCard).join("")}</div>`).join("") || '<div class="empty">조건에 맞는 스킨이 없습니다.</div>';
   };
   ["q","tk","kd","hd"].forEach(i => $("#" + i).addEventListener("input", draw)); draw();
 }
@@ -638,10 +698,13 @@ function skins() {
 function modes() {
   const named = D.modes.filter(m => m.name || m.unreleased), other = D.modes.filter(m => !m.name && !m.unreleased);
   app.innerHTML = `<h1>모드·맵</h1><p class="lead">게임 모드 설정 ${D.modes.length}개와 맵 ${D.maps.length}개. 이름이 없는 항목은 랭크·봇·이벤트용 변형이거나 아직 공개되지 않은 것입니다.</p>
-  <h2>게임 모드</h2><div class="grid g-2">${named.map(m => `<section class="panel"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${L(m.name) || esc(m.type)}</h3><span class="row">${m.unreleased ? '<span class="pill st-upcoming">미공개</span>' : ""}<span class="pill">${esc(m.modeType)}</span></span></div>
+  <h2>게임 모드</h2><div class="grid g-2">${named.map(m => `<section class="panel">${m.bg ? `<img src="img/${encodeURIComponent(m.bg)}.webp" alt="" loading="lazy" style="width:100%;aspect-ratio:21/9;object-fit:cover;border-radius:6px;margin-bottom:10px;display:block">` : ""}<div class="row" style="justify-content:space-between"><h3 style="margin:0" class="row">${IMG(m.icon, L(m.name), "ico", 'width="36" height="36"')}${L(m.name) || esc(m.type)}</h3><span class="row">${m.unreleased ? '<span class="pill st-upcoming">미공개</span>' : ""}<span class="pill">${esc(m.modeType)}</span></span></div>
     <p class="small muted">${esc(m.type)} · 설정 ${m.id}</p>${m.desc.map(d => `<p class="small">${L(d)}</p>`).join("")}</section>`).join("")}</div>
   <details style="margin-top:16px"><summary>이름 없는 모드 설정 ${other.length}개 (랭크·봇·이벤트 변형)</summary><div class="panel scroll"><table class="tbl"><tr><th class="n">ID</th><th>유형</th><th>분류</th><th>게임모드 클래스</th></tr>${other.map(m => `<tr><td class="n">${m.id}</td><td>${esc(m.type)}</td><td>${esc(m.modeType)}</td><td class="mono">${esc(m.cls)}</td></tr>`).join("")}</table></div></details>
-  <h2>맵</h2><div class="panel scroll"><table class="tbl"><tr><th class="n">ID</th><th>이름</th><th>레벨 파일</th><th>상태</th></tr>${D.maps.map(m => `<tr><td class="n">${m.id}</td><td>${L(m.name) || '<span class="muted">이름 없음</span>'}</td><td class="mono">${esc(m.path)}</td><td>${m.disabled ? '<span class="pill hid">비활성</span>' : ""}${!m.name && /NewMode|Stadium|Gym/.test(m.path) ? '<span class="pill st-upcoming">미공개 추정</span>' : ""}${!m.name && !/NewMode|Stadium|Gym/.test(m.path) ? '<span class="pill">변형</span>' : ""}</td></tr>`).join("")}</table></div>
+  <h2>맵</h2><div class="grid g-3">${D.maps.map(m => `<div class="mapcard">${m.bg ? `<img src="img/${encodeURIComponent(m.bg)}.webp" alt="${esc(strip(L(m.name)))}" loading="lazy" data-zoom="${esc(m.bg)}" data-cap="${esc(strip(L(m.name) || m.path))}" style="cursor:zoom-in">` : `<div style="aspect-ratio:16/9;background:var(--steel)"></div>`}
+    <div class="in"><div class="row" style="justify-content:space-between"><b>${L(m.name) || '<span class="muted">이름 없음</span>'}</b>${m.mini ? `<button type="button" class="pill" style="cursor:zoom-in;background:none" data-zoom="${esc(m.mini)}" data-cap="${esc(strip(L(m.name) || m.path))} 미니맵">미니맵</button>` : ""}</div>
+    <div class="small muted">${m.id} · <span class="mono">${esc(m.path)}</span></div>
+    <div class="row" style="margin-top:4px">${m.disabled ? '<span class="pill hid">비활성</span>' : ""}${!m.name && /NewMode|Stadium|Gym/.test(m.path) ? '<span class="pill st-upcoming">미공개 추정</span>' : ""}${!m.name && !/NewMode|Stadium|Gym/.test(m.path) ? '<span class="pill">변형</span>' : ""}</div></div></div>`).join("")}</div>
   <h2>점수 계수 <span class="small muted">전투 결과 점수 계산에 쓰는 값</span></h2>
   <div class="panel scroll">${objTable(D.scoreFactors)}</div>`;
 }
@@ -654,24 +717,24 @@ function objTable(rows) {
 function growth() {
   const M = ["ARES","BASALTIC","IMPACT","UNION"];
   app.innerHTML = `<h1>성장·보상</h1><p class="lead">제조사 평판과 기술 트리, 플레이어 레벨, 리그 등급, 전투 메달, 장비 세트, 소모품, 속성 피해를 모았습니다.</p>
-  <h2>제조사</h2><div class="grid g-2">${M.map(m => `<section class="panel"><span style="font:24px var(--display)">${manuname(m)}</span><p class="small">${L(D.manu[m].desc)}</p>
+  <h2>제조사</h2><div class="grid g-2">${M.map(m => `<section class="panel">${D.manu[m].logo ? `<img src="img/${encodeURIComponent(D.manu[m].logo)}.webp" alt="" loading="lazy" style="height:34px;max-width:100%;display:block;margin-bottom:8px">` : ""}<span class="row" style="font:24px var(--display)">${IMG(D.manu[m].tab, "", "ico", 'width="36" height="36"')}${manuname(m)}</span><p class="small">${L(D.manu[m].desc)}</p>
     <p class="small muted">소속 탱크 ${D.tanks.filter(t => t.manu === m).length}대: ${D.tanks.filter(t => t.manu === m).map(t => `<a href="#t/${t.id}">${tname(t)}</a>`).join(", ")}</p>
-    <details><summary>기술 노드 ${D.tech.filter(x => x.manu === m).length}개</summary>${D.tech.filter(x => x.manu === m).sort((a,b) => a.tier-b.tier || a.sort-b.sort).map(x => `<div class="small" style="padding:6px 0;border-top:1px dashed var(--line)"><b>${L(x.name)}</b> <span class="muted">${x.tier+1}티어${x.needLv ? ` · 제조사 Lv${x.needLv}` : ""}${x.needTanks ? ` · 탱크 ${x.needTanks}대` : ""}</span><br>${L(x.desc)}<br><span class="muted">${x.levels.map((l,i) => `${i+1}단계(${l.tp}TP): ${modText(l.mod)}`).join(" / ")}</span></div>`).join("")}</details>
+    <details><summary>기술 노드 ${D.tech.filter(x => x.manu === m).length}개</summary>${D.tech.filter(x => x.manu === m).sort((a,b) => a.tier-b.tier || a.sort-b.sort).map(x => `<div class="small" style="padding:6px 0;border-top:1px dashed var(--line)">${IMG(x.icon, L(x.name), "ico", 'width="34" height="34" style="float:left;margin-right:8px"')}<b>${L(x.name)}</b> <span class="muted">${x.tier+1}티어${x.needLv ? ` · 제조사 Lv${x.needLv}` : ""}${x.needTanks ? ` · 탱크 ${x.needTanks}대` : ""}</span><br>${L(x.desc)}<br><span class="muted">${x.levels.map((l,i) => `${i+1}단계(${l.tp}TP): ${modText(l.mod)}`).join(" / ")}</span></div>`).join("")}</details>
     <details><summary>평판 레벨 ${D.manuLevels[m].length}단계</summary><table class="tbl"><tr><th>Lv</th><th class="n">필요 경험치</th><th>보상</th><th>해제 스킬</th></tr>${D.manuLevels[m].map(l => `<tr><td>${l.lv}${l.key ? " ★" : ""}</td><td class="n">${num(l.exp)}</td><td>${l.reward ? costs(l.reward) : "–"}</td><td>${l.skill || "–"}</td></tr>`).join("")}</table></details>
   </section>`).join("")}
   <section class="panel" style="border-style:dashed"><div class="row"><span style="font:24px var(--display)">스피어</span><span class="pill st-upcoming">미공개</span></div><p class="small muted">제조사 열거형(EManufacturerType)의 다섯 번째 값 SPHERE. 평판 테이블·소속 탱크가 아직 없습니다.</p></section></div>
 
-  <h2>리그 등급</h2><div class="row">${D.league.map(l => `<span class="pill">${L(l.name) || l.id}${l.sub ? " " + L(l.sub) : ""}</span>`).join("")}</div>
+  <h2>리그 등급</h2><div class="row">${D.league.map(l => `<span class="pill" style="${l.icon ? "padding-left:3px" : ""}">${IMG(l.icon, "", "ico", 'width="26" height="26"')}${L(l.name) || l.id}${l.sub ? " " + L(l.sub) : ""}</span>`).join("")}</div>
   <h2>플레이어 레벨</h2><div class="panel scroll"><table class="tbl"><tr>${D.playerLevels.slice(0,25).map(l => `<th class="n">${l.lv}</th>`).join("")}</tr><tr>${D.playerLevels.slice(0,25).map(l => `<td class="n">${num(l.exp)}</td>`).join("")}</tr><tr>${D.playerLevels.slice(25).map(l => `<th class="n">${l.lv}</th>`).join("")}</tr><tr>${D.playerLevels.slice(25).map(l => `<td class="n">${num(l.exp)}</td>`).join("")}</tr></table><p class="small muted">레벨마다 필요한 경험치</p></div>
   <h2>전투 메달 <span class="small muted">${D.medals.length}개</span></h2>
   <div class="filters"><input type="search" id="mq" placeholder="메달 검색" aria-label="메달 검색"></div><div class="panel scroll"><table class="tbl" id="mlist"></table></div>
-  <h2>장비와 세트</h2><div class="grid g-2"><div class="panel scroll"><table class="tbl"><tr><th>장비</th><th>등급</th><th>보정</th></tr>${D.equip.map(e => `<tr><td>${L(e.name)}</td><td>${esc(e.rarity)}</td><td class="small">${e.mods.map(m => D.modifiers[m] ? L(D.modifiers[m].name) || m : m).join(", ")}</td></tr>`).join("")}</table></div>
+  <h2>장비와 세트</h2><div class="grid g-2"><div class="panel scroll"><table class="tbl"><tr><th>장비</th><th>등급</th><th>보정</th></tr>${D.equip.map(e => `<tr><td>${e.icon ? `<img class="cell" src="img/${encodeURIComponent(e.icon)}.webp" alt="" loading="lazy"> ` : ""}${L(e.name)}</td><td>${esc(e.rarity)}</td><td class="small">${e.mods.map(m => D.modifiers[m] ? L(D.modifiers[m].name) || m : m).join(", ")}</td></tr>`).join("")}</table></div>
     <div class="panel">${D.suits.map(s => `<div class="small" style="padding:6px 0;border-top:1px dashed var(--line)"><b>${L(s.name)}</b> <span class="muted">${esc(s.type)}</span>${s.desc ? `<br>${L(s.desc)}` : ""}<br><span class="muted">${s.sets.map(x => `${x.n}세트: ${modText(x.mod)}`).join(" / ")}</span></div>`).join("")}</div></div>
-  <h2>소모품</h2><div class="grid g-3">${D.consumables.map(c => `<div class="panel"><h3>${L(c.name)}</h3><p class="small">${L(c.desc)}</p><p class="small muted" style="margin:0">전투당 ${costs(c.cost)}${c.module ? " · " + modText(c.module) : ""}</p></div>`).join("")}</div>
+  <h2>소모품</h2><div class="grid g-3">${D.consumables.map(c => `<div class="panel">${IMG(c.icon, L(c.name), "ico lg")}<h3>${L(c.name)}</h3><p class="small">${L(c.desc)}</p><p class="small muted" style="margin:0">전투당 ${costs(c.cost)}${c.module ? " · " + modText(c.module) : ""}</p></div>`).join("")}</div>
   <h2>속성 상태이상</h2><div class="panel scroll"><table class="tbl"><tr><th>행</th><th>속성</th><th class="n">단계</th><th class="n">최대 누적</th><th class="n">회복 지연(초)</th><th class="n">회복 속도</th><th class="n">디버프 피해 비율</th></tr>${D.elements.map(e => `<tr><td>${esc(e.id)}</td><td>${esc(e.type)}</td><td class="n">${e.lv}</td><td class="n">${num(e.max)}</td><td class="n">${num(e.recDelay)}</td><td class="n">${num(e.recSpeed)}</td><td class="n">${num(e.debuff*100)}%</td></tr>`).join("")}</table></div>
-  <h2>상품</h2><div class="panel scroll"><table class="tbl"><tr><th class="n">ID</th><th>이름</th><th>분류</th><th>설명</th></tr>${D.goods.map(g => `<tr><td class="n">${g.id}</td><td>${L(g.name) || "–"}</td><td>${esc(g.sub)}</td><td class="small">${L(g.desc)}</td></tr>`).join("")}</table></div>`;
+  <h2>상품</h2><div class="panel scroll"><table class="tbl"><tr><th class="n">ID</th><th>이름</th><th>분류</th><th>설명</th></tr>${D.goods.map(g => `<tr><td class="n">${g.id}</td><td>${g.icon ? `<img class="cell" src="img/${encodeURIComponent(g.icon)}.webp" alt="" loading="lazy"> ` : ""}${L(g.name) || "–"}</td><td>${esc(g.sub)}</td><td class="small">${L(g.desc)}</td></tr>`).join("")}</table></div>`;
   const md = () => { const q = $("#mq").value.trim().toLowerCase();
-    $("#mlist").innerHTML = `<tr><th>메달</th><th>종류</th><th>등급</th><th class="n">보너스 점수</th><th>조건</th></tr>` + D.medals.filter(m => !q || strip(L(m.name) + L(m.desc)).toLowerCase().includes(q)).map(m => `<tr><td><b>${L(m.name) || "–"}</b> ${m.locOnly ? '<span class="pill st-new">텍스트만</span>' : ""}</td><td>${esc(m.type || "–")}</td><td>${esc(m.grade || "–")}</td><td class="n">${num(m.score)}</td><td class="small">${L(m.desc)}${m.p1 ? ` <span class="muted">(값 ${m.p1}${m.p2 ? ", " + m.p2 : ""})</span>` : ""}</td></tr>`).join(""); };
+    $("#mlist").innerHTML = `<tr><th>메달</th><th>종류</th><th>등급</th><th class="n">보너스 점수</th><th>조건</th></tr>` + D.medals.filter(m => !q || strip(L(m.name) + L(m.desc)).toLowerCase().includes(q)).map(m => `<tr><td>${m.icon ? `<img class="cell" src="img/${encodeURIComponent(m.icon)}.webp" alt="" loading="lazy"> ` : ""}<b>${L(m.name) || "–"}</b> ${m.locOnly ? '<span class="pill st-new">텍스트만</span>' : ""}</td><td>${esc(m.type || "–")}</td><td>${esc(m.grade || "–")}</td><td class="n">${num(m.score)}</td><td class="small">${L(m.desc)}${m.p1 ? ` <span class="muted">(값 ${m.p1}${m.p2 ? ", " + m.p2 : ""})</span>` : ""}</td></tr>`).join(""); };
   $("#mq").addEventListener("input", md); md();
 }
 
@@ -683,7 +746,7 @@ function hidden() {
   <p class="lead">클라이언트 ${esc(D.build.version)}에 이미 들어 있지만 게임 안에서 볼 수 없거나 아직 번역되지 않은 데이터입니다. 판단은 데이터 구성으로 한 추정이고, 출시 여부와 시기는 개발사가 정합니다.</p>
   <div class="hazard-box" style="margin-top:20px"><div class="tape"></div><div class="in">
   <h2 style="margin-top:0">탱크</h2>
-  <div class="grid g-2">${up.map(t => `<a class="tcard" href="#t/${t.id}" style="--rc:${RC[t.rarity]}"><div class="top">${tankSvg(t, 74)}<div><div class="nm">${tname(t)}</div><div class="md">${esc(t.model)} · ${typename(t.type)} · ${manuname(t.manu)}</div></div></div>
+  <div class="grid g-2">${up.map(t => `<a class="tcard" href="#t/${t.id}" style="--rc:${RC[t.rarity]}">${t.img ? tankShot(t) : ""}<div class="top">${t.img ? "" : tankSvg(t, 74)}<div><div class="nm">${tname(t)}</div><div class="md">${esc(t.model)} · ${typename(t.type)} · ${manuname(t.manu)}</div></div></div>
     <div class="row badges">${stPill(t)}${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span></div>
     <p class="small" style="margin:8px 0 0">${L(t.skill.name) ? `파워 무브 <b>${L(t.skill.name)}</b>` : ""}${L(t.trait.name) ? ` · 특성 <b>${L(t.trait.name)}</b>` : ""}</p>
     <p class="small muted" style="margin:4px 0 0">${t.why.map(esc).join(", ")} · Lv${MAXLV} 내구도 ${num(lvRow(t,MAXLV).hp)} / 피해 ${num(lvRow(t,MAXLV).dmg)}</p></a>`).join("")}</div>
@@ -709,6 +772,26 @@ function hidden() {
   ${Object.entries(H.untranslated).sort((a,b) => b[1].length - a[1].length).map(([g, xs]) => `<details class="panel" style="margin-bottom:8px"><summary><b>${esc(g)}</b> <span class="muted">${xs.length}</span></summary><table class="tbl">${xs.map(x => `<tr><td class="mono" style="width:40%">${esc(x.k)}</td><td class="small">${x.en}</td></tr>`).join("")}</table></details>`).join("")}`;
 }
 
+// ---------- 이미지 갤러리 ----------
+let GAL = null;
+function gallery(group) {
+  const groups = D.gallery.filter(g => g[2]);
+  group = group || groups[0][0];
+  app.innerHTML = `<h1>이미지</h1><p class="lead">게임 클라이언트에 들어 있는 UI 이미지 ${groups.reduce((a, g) => a + g[2], 0).toLocaleString("ko-KR")}장입니다. 누르면 크게 볼 수 있습니다.</p>
+  <nav class="row" style="margin:16px 0" aria-label="이미지 분류">${groups.map(([g, lab, n]) => `<a class="pill" href="#gallery/${g}" style="text-decoration:none;padding:4px 12px;${g === group ? "background:var(--hazard);color:var(--hazard-ink);border-color:var(--hazard)" : ""}">${esc(lab)} ${n}</a>`).join("")}</nav>
+  <div class="filters"><input type="search" id="q" placeholder="이름 검색" aria-label="이미지 검색"><span class="count" id="cnt"></span></div><div class="thumbs" id="list"><div class="empty">불러오는 중…</div></div>`;
+  const draw = () => {
+    const q = $("#q").value.trim().toLowerCase();
+    const ls = (GAL[group] || []).filter(([n, c]) => !q || (n + " " + strip(L(c))).toLowerCase().includes(q));
+    $("#cnt").textContent = ls.length + "장";
+    $("#list").innerHTML = ls.map(([n, c]) => { const cap = strip(L(c)) || n.replace(/^T_(UI_|HQ_|common_|callingcard_)?/i, "").replace(/_/g, " "); return `<button type="button" class="thumb" data-zoom="${esc(n)}" data-cap="${esc(cap)}"><img src="img/${encodeURIComponent(n)}.webp" alt="${esc(cap)}" loading="lazy" decoding="async"><span>${esc(cap)}</span></button>`; }).join("") || '<div class="empty">검색 결과가 없습니다.</div>';
+  };
+  const go = () => { $("#q").addEventListener("input", draw); draw(); };
+  if (GAL) return go();
+  fetch("gallery.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { GAL = j; go(); })
+    .catch(() => { $("#list").innerHTML = '<div class="empty">이미지 목록을 불러오지 못했습니다. 새로고침해 보세요.</div>'; });
+}
+
 // ---------- 원본 데이터 ----------
 const tcache = {};
 function data(name) {
@@ -727,7 +810,7 @@ function data(name) {
   const show = j => {
     const rows = Object.entries(j.rows);
     const keys = [...new Set(rows.flatMap(([, r]) => r && typeof r === "object" ? Object.keys(r) : []))];
-    const cell = v => v == null ? '<span class="muted">–</span>' : (typeof v === "object" ? (v.$t !== undefined ? esc(v.$t) : `<code>${esc(JSON.stringify(v, (k, x) => x && x.$t !== undefined ? x.$t : x)).slice(0, 400)}</code>`) : (typeof v === "number" ? num(v, 4) : esc(v)));
+    const cell = v => v == null ? '<span class="muted">–</span>' : (typeof v === "object" ? (v.$img ? `<img class="cell" src="img/${encodeURIComponent(v.$img)}.webp" alt="" loading="lazy" data-zoom="${esc(v.$img)}" style="cursor:zoom-in">` : v.$t !== undefined ? esc(v.$t) : `<code>${esc(JSON.stringify(v, (k, x) => x && x.$t !== undefined ? x.$t : x)).slice(0, 400)}</code>`) : (typeof v === "number" ? num(v, 4) : esc(v)));
     let lim = 200;
     const draw = () => { const q = $("#q").value.trim().toLowerCase();
       const ls = rows.filter(([k, r]) => !q || (k + JSON.stringify(r)).toLowerCase().includes(q));
