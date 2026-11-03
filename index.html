@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>탱크어붐 데이터 도감</title>
+<meta name="description" content="Tank-a-Boom 탱크·특성·부품·칩·스킨·모드와 게임 안에서 볼 수 없는 수치, 출시 예정 콘텐츠까지 한곳에 모은 비공식 데이터 도감">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e2f3d'/%3E%3Crect x='5' y='16' width='22' height='8' rx='2' fill='%23ffb43a'/%3E%3Crect x='10' y='10' width='11' height='7' rx='2' fill='%23ffb43a'/%3E%3Crect x='20' y='12' width='9' height='2.5' fill='%23ffb43a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --steel:#1e2f3d; --steel-2:#253a4b; --steel-3:#2f485c; --line:#3b566c;
+  --ink:#e9eef2; --ink-2:#a9b9c6; --ink-3:#7890a3;
+  --hazard:#f2c230; --hazard-ink:#1c1a12; --danger:#ff6b5b; --ok:#5fd39a;
+  --r1:#9fb0bf; --r2:#4fa8ff; --r3:#bb83ff; --r4:#ffb43a;
+  --display:"Black Han Sans","Apple SD Gothic Neo",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{background:var(--steel)}
+body{margin:0;background:var(--steel);color:var(--ink);font:15px/1.6 var(--body);font-variant-numeric:tabular-nums;-webkit-text-size-adjust:100%}
+a{color:inherit}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+
+/* 상단 */
+header.top{position:sticky;top:0;z-index:20;background:rgba(30,47,61,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:14px;height:56px}
+.brand{font:22px/1 var(--display);letter-spacing:.5px;text-decoration:none;white-space:nowrap}
+.brand small{font:500 12px var(--body);color:var(--ink-3);margin-left:8px;letter-spacing:0}
+.bar .sp{flex:1}
+.lang{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.lang button{background:none;border:0;padding:4px 10px;cursor:pointer;color:var(--ink-3)}
+.lang button[aria-pressed=true]{background:var(--steel-3);color:var(--ink)}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{flex:none;padding:9px 12px 11px;text-decoration:none;color:var(--ink-2);border-bottom:3px solid transparent;font-weight:500;font-size:14px}
+nav.tabs a:hover{color:var(--ink)}
+nav.tabs a[aria-current=page]{color:var(--ink);border-bottom-color:var(--hazard)}
+nav.tabs a.warn{color:var(--hazard)}
+
+main{padding:28px 0 64px;min-height:70vh}
+h1,h2,h3{margin:0;font-weight:400}
+h1{font:clamp(30px,5vw,46px)/1.1 var(--display)}
+h2{font:26px/1.2 var(--display);margin:40px 0 14px}
+h3{font:700 16px/1.4 var(--body);margin:0 0 6px}
+p{margin:0 0 10px}
+.lead{color:var(--ink-2);max-width:68ch;margin-top:10px}
+.muted{color:var(--ink-3)}
+.small{font-size:13px}
+.ph{font-style:normal;color:var(--hazard);background:rgba(242,194,48,.1);padding:0 3px;border-radius:3px}
+.hl{color:#7fd4ff}
+
+/* 경고 테이프: 미공개 영역 전용 */
+.tape{background:repeating-linear-gradient(-45deg,var(--hazard) 0 14px,var(--hazard-ink) 14px 28px);height:10px;border-radius:2px}
+.hazard-box{border:2px solid var(--hazard);border-radius:10px;background:linear-gradient(180deg,rgba(242,194,48,.08),transparent 60%);overflow:hidden}
+.hazard-box .in{padding:18px 18px 20px}
+
+/* 공통 블록 */
+.panel{background:var(--steel-2);border:1px solid var(--line);border-radius:10px;padding:16px}
+.grid{display:grid;gap:12px}
+.g-cards{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.g-2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g-3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);white-space:nowrap;line-height:1.6}
+.pill.r1{color:var(--r1);border-color:color-mix(in srgb,var(--r1) 50%,transparent)}
+.pill.r2{color:var(--r2);border-color:color-mix(in srgb,var(--r2) 50%,transparent)}
+.pill.r3{color:var(--r3);border-color:color-mix(in srgb,var(--r3) 50%,transparent)}
+.pill.r4{color:var(--r4);border-color:color-mix(in srgb,var(--r4) 50%,transparent)}
+.pill.st-upcoming,.pill.st-new,.pill.st-tutorial{background:var(--hazard);color:var(--hazard-ink);border-color:var(--hazard)}
+.pill.st-new{background:transparent;color:var(--hazard)}
+.pill.st-tutorial{background:transparent;color:var(--ink-2);border-color:var(--line)}
+.pill.hid{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 50%,transparent)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+
+/* 필터 */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 14px;align-items:center}
+.filters input[type=search]{flex:1 1 220px;min-width:0;background:var(--steel-2);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.filters select{background:var(--steel-2);border:1px solid var(--line);border-radius:8px;padding:7px 8px;max-width:100%}
+.count{color:var(--ink-3);font-size:13px;margin-left:auto}
+
+/* 탱크 카드 */
+.tcard{display:block;text-decoration:none;background:var(--steel-2);border:1px solid var(--line);border-radius:10px;padding:14px;position:relative;border-top:3px solid var(--rc)}
+.tcard:hover{background:var(--steel-3)}
+.tcard .top{display:flex;gap:12px;align-items:center}
+.tcard svg{flex:none}
+.tcard .nm{font:21px/1.15 var(--display)}
+.tcard .md{color:var(--ink-3);font-size:13px}
+.tcard .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.tcard .stats b{display:block;font-size:16px}
+.tcard .stats span{font-size:12px;color:var(--ink-3)}
+.tcard .badges{margin-top:10px}
+
+/* 상세 */
+.dhead{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.dhead .nm{font:clamp(34px,6vw,54px)/1 var(--display)}
+.dhead .sub{color:var(--ink-2);margin-top:6px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:2px 14px;font-size:14px}
+.kv dt{color:var(--ink-2)}
+.kv dd{margin:0;text-align:right;font-weight:500}
+.kv dt small{color:var(--ink-3)}
+.stat{display:grid;grid-template-columns:minmax(90px,140px) 1fr 64px;gap:10px;align-items:center;font-size:14px;padding:3px 0}
+.stat .lab{color:var(--ink-2)}
+.stat .v{text-align:right;font-weight:700}
+.meter{height:8px;background:var(--steel);border-radius:4px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--rc,var(--r2));border-radius:4px}
+.lvl{display:flex;align-items:center;gap:12px;margin:6px 0 12px}
+.lvl input{flex:1;accent-color:var(--hazard)}
+.lvl output{font:22px/1 var(--display);min-width:68px}
+.ability{border-left:3px solid var(--rc);padding:2px 0 2px 12px;margin-bottom:14px}
+.ability .ttl{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.ability .ttl b{font-size:17px}
+.slot{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.slot .opt{padding:6px 0;border-top:1px dashed var(--line)}
+.slot .opt:first-of-type{border-top:0}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{color:var(--ink-3);font-weight:500;font-size:13px;position:sticky;top:0;background:var(--steel-2)}
+.tbl td.n,.tbl th.n{text-align:right}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.scroll{overflow:auto;max-width:100%}
+.best{color:var(--ok);font-weight:700}
+details summary{cursor:pointer;color:var(--ink-2)}
+details[open] summary{margin-bottom:8px}
+.crumbs{font-size:14px;color:var(--ink-3);margin-bottom:12px}
+.crumbs a{color:var(--ink-2)}
+.empty{padding:30px;text-align:center;color:var(--ink-3)}
+code,.mono{font:13px/1.5 ui-monospace,Menlo,monospace;color:var(--ink-2);word-break:break-all}
+
+/* 홈 */
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:end}
+.hero .lineup{display:flex;align-items:flex-end;gap:2px;overflow:hidden;height:120px;mask-image:linear-gradient(90deg,#000 70%,transparent)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:24px}
+.facts a{background:var(--steel-2);padding:14px 16px;text-decoration:none}
+.facts a:hover{background:var(--steel-3)}
+.facts b{font:28px/1 var(--display);display:block}
+.facts span{color:var(--ink-2);font-size:13px}
+.up{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.up a{display:block;text-decoration:none;background:rgba(0,0,0,.18);border-radius:8px;padding:12px}
+.up a:hover{background:rgba(0,0,0,.3)}
+
+footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:13px;padding:22px 0 40px}
+footer p{max-width:80ch}
+
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr}
+  .dhead{grid-template-columns:1fr}
+  .dhead svg{width:150px;height:auto}
+  .stat{grid-template-columns:96px 1fr 58px}
+  .brand small{display:none}
+}
+@media (prefers-reduced-motion:no-preference){
+  .hero .lineup svg{animation:roll .7s cubic-bezier(.2,.8,.2,1) both}
+}
+@keyframes roll{from{transform:translateX(-40px);opacity:0}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <a class="brand" href="#">탱크어붐 데이터 도감<small>비공식 · 클라이언트 데이터 기준</small></a>
+      <span class="sp"></span>
+      <div class="lang" role="group" aria-label="이름 표기 언어">
+        <button type="button" data-lang="ko" aria-pressed="true">한국어</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="메뉴">
+      <a href="#tanks">탱크</a>
+      <a href="#compare">비교</a>
+      <a href="#skills">스킬·특성</a>
+      <a href="#parts">부품</a>
+      <a href="#chips">칩</a>
+      <a href="#operators">오퍼레이터</a>
+      <a href="#skins">스킨</a>
+      <a href="#modes">모드·맵</a>
+      <a href="#growth">성장·보상</a>
+      <a href="#hidden" class="warn">미공개·출시 예정</a>
+      <a href="#data">원본 데이터</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap" id="app" tabindex="-1"></main>
+<footer>
+  <div class="wrap">
+    <p>비공식 팬 사이트입니다. 게임 이름과 콘텐츠의 권리는 개발사와 각 권리자에게 있습니다. 게임 이미지·사운드는 담지 않았고, 클라이언트에 들어 있는 수치·텍스트만 정리했습니다.</p>
+    <p id="buildinfo"></p>
+    <p>‘출시 예정’ 표시는 번역 유무·스킨·칩 구성으로 판단한 추정입니다. 실제 출시 일정과 다를 수 있고, 서버 쪽 설정(가격·확률·이벤트)은 반영되지 않습니다.</p>
+  </div>
+</footer>
+<script src="data.js"></script>
+<script>
+"use strict";
+const D = window.DB;
+let LANG = "ko";
+try { LANG = localStorage.getItem("tab-lang") || "ko"; } catch (e) {}
+const RC = {0:"var(--ink-3)",1:"var(--r1)",2:"var(--r2)",3:"var(--r3)",4:"var(--r4)"};
+const TANK = Object.fromEntries(D.tanks.map(t => [t.id, t]));
+const $ = (s, el=document) => el.querySelector(s);
+const app = $("#app");
+
+// ---------- 헬퍼 ----------
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const L = o => o ? (o[LANG] || o.ko || o.en || "") : "";
+const strip = h => String(h || "").replace(/<[^>]*>/g, "").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&");
+const num = (v, d=2) => v == null ? "–" : (typeof v === "number" ? (Number.isInteger(v) ? v.toLocaleString("ko-KR") : (+v.toFixed(d)).toLocaleString("ko-KR")) : esc(v));
+const tname = t => L(t.name) || esc(t.model || t.id);
+const rname = r => L(D.rarity[r]) || "–";
+const rolename = r => r ? L(D.roles[r]) : "역할 없음";
+const typename = t => L(D.types[t]) || t;
+const manuname = m => D.manu[m] ? L(D.manu[m].name) : m;
+const curname = id => D.currency[id] ? L(D.currency[id]) : "#" + id;
+const costs = c => !c ? "–" : (Array.isArray(c) ? c : [c]).map(x => `${num(x.n)} ${curname(x.id)}`).join(", ") || "–";
+const STATUS = {released:null, new:"신규·최근", upcoming:"출시 예정", tutorial:"튜토리얼 전용"};
+const stPill = t => STATUS[t.status] ? `<span class="pill st-${t.status}">${STATUS[t.status]}</span>` : "";
+const rPill = r => `<span class="pill r${r}">${rname(r)}</span>`;
+function modText(m) {
+  if (!m || !m.mods) return "";
+  return m.mods.map(x => {
+    const nm = D.modifiers[x.m] ? L(D.modifiers[x.m].name) : x.m;
+    const parts = [];
+    if (x.r) parts.push(`${x.r > 0 ? "+" : ""}${num(x.r)}%`);
+    if (x.a) parts.push(`${x.a > 0 ? "+" : ""}${num(x.a)}`);
+    return `${nm || esc(x.m)} ${parts.join(" / ") || "0"}`;
+  }).join(", ") + (m.ability ? ` <span class="muted small">(능력 ${esc(m.ability)})</span>` : "");
+}
+function lvRow(t, lv) { return t.levels.find(x => x.lv === lv) || t.levels[t.levels.length - 1] || {}; }
+function dps(t, lv) {
+  const l = lvRow(t, lv), f = t.fire, w = t.weapon || {};
+  const mag = f.MagazineCapacity || 1, shell = f.ShellReloadTime || w.shellWait || 0;
+  const cycle = mag > 1 ? f.ClipReloadTime + (mag - 1) * shell : f.ClipReloadTime;
+  return cycle ? (l.dmg || 0) * mag * (w.dmgRate || 1) / cycle : null;
+}
+const MAXLV = Math.max(...D.tanks.map(t => t.levels.length));
+
+// 탱크 실루엣(차종별)
+function tankSvg(t, w=86) {
+  const c = RC[t.rarity];
+  const geo = {HeavyTank:[6,34,74,16,22,20,32,14,40], MediumTank:[8,36,70,14,26,22,28,12,36], LightTank:[10,38,64,12,30,24,24,11,30], TankDestroyer:[6,36,76,14,14,24,46,12,48]}[t.type] || [8,36,70,14,26,22,28,12,36];
+  const [hx,hy,hw,hh,tx,ty,tw,th,bl] = geo;
+  const h = Math.round(w * 0.62);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 90 56" aria-hidden="true">
+    <rect x="${hx}" y="${hy+hh-2}" width="${hw}" height="9" rx="4.5" fill="#132029" stroke="${c}" stroke-opacity=".5"/>
+    <path d="M${hx+4} ${hy}h${hw-8}l4 ${hh}h-${hw}z" fill="${c}" fill-opacity=".9"/>
+    <rect x="${tx}" y="${ty}" width="${tw}" height="${th}" rx="4" fill="${c}"/>
+    <rect x="${tx+tw-2}" y="${ty+th/2-2}" width="${bl}" height="4" rx="1.5" fill="${c}"/>
+    ${[0,1,2,3,4].map(i => `<circle cx="${hx+8+i*(hw-16)/4}" cy="${hy+hh+2.5}" r="2.2" fill="${c}" fill-opacity=".6"/>`).join("")}
+  </svg>`;
+}
+function spark(pts, w=260, h=64) {
+  if (!pts || pts.length < 2) return "";
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(0, ...ys), y1 = Math.max(...ys) || 1;
+  const P = pts.map(p => `${((p[0]-x0)/(x1-x0||1)*(w-8)+4).toFixed(1)},${(h-4-(p[1]-y0)/(y1-y0||1)*(h-8)).toFixed(1)}`).join(" ");
+  return `<svg width="100%" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="max-width:${w}px;height:${h}px" role="img" aria-label="곡선"><polyline points="${P}" fill="none" stroke="var(--hazard)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+  <div class="row small muted" style="justify-content:space-between;max-width:${w}px"><span>${num(x0,0)}</span><span>${num(x1,0)}</span></div>`;
+}
+
+// ---------- 라우터 ----------
+const ROUTES = {"": home, tanks, t: tankDetail, compare, skills, parts, chips, operators, skins, modes, growth, hidden, data};
+let lastRoute = null;
+function render() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  const [r, ...args] = h.split("/");
+  (ROUTES[r] || home)(...args);
+  document.querySelectorAll("nav.tabs a").forEach(a => a.toggleAttribute("aria-current", a.getAttribute("href") === "#" + (r === "t" ? "tanks" : r)));
+  document.querySelectorAll("nav.tabs a[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
+  if (lastRoute !== h) { if (!h.includes("?")) window.scrollTo(0, 0); lastRoute = h; }
+}
+window.addEventListener("hashchange", render);
+document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => {
+  LANG = b.dataset.lang; try { localStorage.setItem("tab-lang", LANG); } catch (e) {}
+  document.querySelectorAll(".lang button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+}));
+document.querySelectorAll(".lang button").forEach(x => x.setAttribute("aria-pressed", x.dataset.lang === LANG));
+
+// ---------- 홈 ----------
+function home() {
+  const up = D.tanks.filter(t => t.status !== "released");
+  const lineup = [...D.tanks].sort((a,b) => b.rarity - a.rarity).slice(0, 14);
+  const H = D.hidden;
+  const untr = Object.values(H.untranslated).reduce((a, b) => a + b.length, 0);
+  app.innerHTML = `
+  <section class="hero">
+    <div>
+      <h1>탱크 30대, 그 안의 숫자 전부</h1>
+      <p class="lead">게임 화면에서는 ‘공격력 높음’ 정도로만 보이는 값을 실제 수치로 풀었습니다. 레벨별 내구도와 피해량, 재장전과 분산, 엔진 곡선, 부품과 칩, 그리고 아직 나오지 않은 탱크와 모드까지 클라이언트 ${esc(D.build.version)} 빌드에서 그대로 읽었습니다.</p>
+    </div>
+    <div class="lineup" aria-hidden="true">${lineup.map((t,i) => `<span style="animation-delay:${i*40}ms;display:inline-block">${tankSvg(t, 64 + (t.type==="HeavyTank"?12:0))}</span>`).join("")}</div>
+  </section>
+  <div class="facts">
+    <a href="#tanks"><b>${D.tanks.length}</b><span>탱크</span></a>
+    <a href="#parts"><b>${Object.keys(D.parts).length}</b><span>부품</span></a>
+    <a href="#chips"><b>${Object.keys(D.chips).length}</b><span>칩</span></a>
+    <a href="#skins"><b>${Object.keys(D.skins).length}</b><span>스킨</span></a>
+    <a href="#modes"><b>${D.modes.length}</b><span>모드 설정</span></a>
+    <a href="#data"><b>${D.tables.length}</b><span>원본 테이블</span></a>
+  </div>
+
+  <h2>출시 예정과 미공개 콘텐츠</h2>
+  <div class="hazard-box"><div class="tape"></div><div class="in">
+    <p class="muted">클라이언트에는 들어 있지만 게임에서 아직 보이지 않거나, 한국어 번역이 빠진 콘텐츠입니다.</p>
+    <div class="up">
+      ${up.map(t => `<a href="#t/${t.id}"><div class="row">${stPill(t)}${rPill(t.rarity)}</div>
+        <div style="font:22px/1.2 var(--display);margin-top:6px">${tname(t)}</div>
+        <div class="small muted">${esc(t.model)} · ${typename(t.type)} · ${manuname(t.manu)}</div>
+        <div class="small" style="margin-top:4px">${t.why.map(esc).join(", ")}</div></a>`).join("")}
+      <a href="#hidden"><div class="row"><span class="pill st-upcoming">미공개 모드</span></div>
+        <div style="font:22px/1.2 var(--display);margin-top:6px">${H.unreleasedModes.length}개 모드</div>
+        <div class="small muted">${H.unreleasedModes.map(id => esc(D.modes.find(m => m.id === id).type)).join(", ")}</div></a>
+      <a href="#hidden"><div class="row"><span class="pill st-new">번역 대기</span></div>
+        <div style="font:22px/1.2 var(--display);margin-top:6px">문구 ${untr}개</div>
+        <div class="small muted">영어로만 있는 텍스트: 신규 메달·부품·탱크 등</div></a>
+    </div>
+  </div></div>
+
+  <h2>둘러보기</h2>
+  <div class="grid g-3">
+    ${[["#compare","탱크 비교","같은 레벨에서 내구도·피해·DPS·분산을 나란히 봅니다."],["#skills","스킬·특성","파워 무브와 고유 특성 설명을 한 표로."],["#chips","칩","칩 등급과 태그, 어떤 탱크가 쓸 수 있는지."],["#growth","성장·보상","제조사 레벨·기술 트리, 리그, 메달, 장비 세트."],["#data","원본 데이터","121개 테이블을 가공 없이 검색합니다."]].map(([h,a,b]) => `<a class="panel" style="text-decoration:none" href="${h}"><h3>${a}</h3><p class="muted small">${b}</p></a>`).join("")}
+  </div>`;
+}
+
+// ---------- 탱크 목록 ----------
+const tf = {q:"", rarity:"", role:"", type:"", manu:"", status:"", sort:"rarity"};
+function tanks() {
+  const opts = (k, arr, lab) => `<select data-k="${k}" aria-label="${lab}"><option value="">${lab}: 전체</option>${arr.map(([v,n]) => `<option value="${v}" ${tf[k]==v?"selected":""}>${n}</option>`).join("")}</select>`;
+  app.innerHTML = `<h1>탱크</h1>
+  <p class="lead">카드의 숫자는 레벨 ${MAXLV} 기준입니다. 정렬은 같은 레벨 값으로 합니다.</p>
+  <div class="filters">
+    <input type="search" placeholder="이름·모델·스킬 검색" value="${esc(tf.q)}" data-k="q" aria-label="검색">
+    ${opts("rarity",[1,2,3,4].map(r => [r, strip(rname(r))]),"등급")}
+    ${opts("role",Object.keys(D.roles).map(r => [r, strip(rolename(r))]),"역할")}
+    ${opts("type",Object.keys(D.types).map(r => [r, strip(typename(r))]),"차종")}
+    ${opts("manu",["ARES","BASALTIC","IMPACT","UNION"].map(m => [m, strip(manuname(m))]),"제조사")}
+    ${opts("status",[["released","출시"],["new","신규·최근"],["upcoming","출시 예정"],["tutorial","튜토리얼"]],"상태")}
+    <select data-k="sort" aria-label="정렬">${[["rarity","등급순"],["hp","내구도"],["dmg","피해량"],["dps","추정 DPS"],["reload","재장전 빠른순"],["id","번호순"]].map(([v,n]) => `<option value="${v}" ${tf.sort===v?"selected":""}>${n}</option>`).join("")}</select>
+    <span class="count" id="cnt"></span>
+  </div>
+  <div class="grid g-cards" id="list"></div>`;
+  app.querySelectorAll("[data-k]").forEach(el => el.addEventListener("input", () => { tf[el.dataset.k] = el.value; drawTanks(); }));
+  drawTanks();
+}
+function drawTanks() {
+  const q = tf.q.trim().toLowerCase();
+  let list = D.tanks.filter(t =>
+    (!tf.rarity || t.rarity == tf.rarity) && (!tf.role || t.role === tf.role) && (!tf.type || t.type === tf.type) &&
+    (!tf.manu || t.manu === tf.manu) && (!tf.status || t.status === tf.status) &&
+    (!q || [strip(L(t.name)), t.model, strip(t.name?.en), strip(L(t.skill.name)), strip(L(t.trait.name)), String(t.id)].join(" ").toLowerCase().includes(q)));
+  const by = {rarity:(a,b)=>b.rarity-a.rarity||a.id-b.id, hp:(a,b)=>lvRow(b,MAXLV).hp-lvRow(a,MAXLV).hp, dmg:(a,b)=>lvRow(b,MAXLV).dmg-lvRow(a,MAXLV).dmg,
+    dps:(a,b)=>dps(b,MAXLV)-dps(a,MAXLV), reload:(a,b)=>a.fire.ClipReloadTime-b.fire.ClipReloadTime, id:(a,b)=>a.id-b.id};
+  list.sort(by[tf.sort]);
+  $("#cnt").textContent = `${list.length}대`;
+  $("#list").innerHTML = list.map(t => { const l = lvRow(t, MAXLV); return `
+    <a class="tcard" href="#t/${t.id}" style="--rc:${RC[t.rarity]}">
+      <div class="top">${tankSvg(t, 74)}<div><div class="nm">${tname(t)}</div><div class="md">${esc(t.model)} · ${typename(t.type)}</div></div></div>
+      <div class="row badges">${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span><span class="pill">${manuname(t.manu)}</span>${stPill(t)}</div>
+      <div class="stats"><div><b>${num(l.hp)}</b><span>내구도</span></div><div><b>${num(l.dmg)}</b><span>피해량</span></div><div><b>${num(t.fire.ClipReloadTime)}초</b><span>재장전</span></div></div>
+    </a>`; }).join("") || `<div class="empty">조건에 맞는 탱크가 없습니다. 필터를 줄여 보세요.</div>`;
+}
+
+// ---------- 탱크 상세 ----------
+const STATMAX = {};
+function statMax(key, f) { if (!(key in STATMAX)) STATMAX[key] = Math.max(...D.tanks.map(f).filter(x => x != null && isFinite(x))); return STATMAX[key]; }
+function meterRow(lab, val, max, unit="", invert=false, tip="") {
+  const pct = max ? Math.max(3, Math.min(100, (invert ? (max / (val || max)) * 40 : val / max * 100))) : 0;
+  return `<div class="stat" ${tip?`title="${esc(tip)}"`:""}><span class="lab">${lab}</span><span class="meter"><i style="width:${pct}%"></i></span><span class="v">${num(val)}${unit}</span></div>`;
+}
+function tankDetail(id) {
+  const t = TANK[id];
+  if (!t) { app.innerHTML = `<div class="empty">탱크 ${esc(id)}를 찾을 수 없습니다. <a href="#tanks">목록으로</a></div>`; return; }
+  const f = t.fire, e = t.energy, b = t.body, m = t.move, p = t.proj || {}, w = t.weapon;
+  app.innerHTML = `
+  <div class="crumbs"><a href="#tanks">탱크</a> / ${tname(t)}</div>
+  <section class="dhead" style="--rc:${RC[t.rarity]}">
+    ${tankSvg(t, 200)}
+    <div>
+      <div class="row">${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span><span class="pill">${typename(t.type)}</span><span class="pill">${manuname(t.manu)}</span>${stPill(t)}</div>
+      <div class="nm" style="margin-top:8px">${tname(t)}</div>
+      <div class="sub">${LANG==="ko" ? esc(strip(t.name?.en)) + " · " : ""}실제 모델 ${esc(t.model)} · 번호 ${t.id}</div>
+      ${t.tags.length ? `<div class="row" style="margin-top:8px">${t.tags.map(x => `<span class="pill">${L(x)}</span>`).join("")}</div>` : ""}
+      ${t.why.length ? `<p class="small" style="margin-top:8px;color:var(--hazard)">판단 근거: ${t.why.map(esc).join(", ")}</p>` : ""}
+    </div>
+  </section>
+
+  <div class="grid g-2" style="margin-top:26px">
+    <section class="panel" style="--rc:${RC[t.rarity]}">
+      <div class="ability"><div class="ttl"><span class="pill">파워 무브</span><b>${L(t.skill.name) || "–"}</b></div><p>${L(t.skill.desc) || '<span class="muted">설명 없음</span>'}</p>${t.skill.ability ? `<div class="small muted">능력 에셋 ${esc(t.skill.ability)}</div>` : ""}</div>
+      <div class="ability"><div class="ttl"><span class="pill">고유 특성</span><b>${L(t.trait.name) || "–"}</b></div><p>${L(t.trait.desc) || '<span class="muted">설명 없음</span>'}</p>${t.trait.ability ? `<div class="small muted">능력 에셋 ${esc(t.trait.ability)}</div>` : ""}</div>
+      ${w ? `<div class="ability"><div class="ttl"><span class="pill">주무장</span><b>${L(w.name)}</b><span class="small muted">${esc(w.type)}</span></div><p>${L(w.desc)}</p></div>` : ""}
+    </section>
+    <section class="panel" style="--rc:${RC[t.rarity]}">
+      <h3>레벨별 능력치</h3>
+      <div class="lvl"><input type="range" min="1" max="${t.levels.length}" value="${t.levels.length}" id="lv" aria-label="레벨"><output id="lvo"></output></div>
+      <div id="lvstats"></div>
+    </section>
+  </div>
+
+  <h2>사격</h2>
+  <div class="grid g-3">
+    <div class="panel"><dl class="kv">
+      <dt>탄창</dt><dd>${num(f.MagazineCapacity)}발</dd>
+      <dt>재장전(탄창)</dt><dd>${num(f.ClipReloadTime)}초</dd>
+      <dt>최소 재장전 <small>보정 하한</small></dt><dd>${num(f.MinClipReloadTime)}초</dd>
+      <dt>발간 장전</dt><dd>${num(f.ShellReloadTime || (w && w.shellWait))}초</dd>
+      <dt>자동 사격</dt><dd>${f.bIsAutomatic ? "예" : "아니오"}</dd>
+      <dt>최대 피해 거리</dt><dd>${num(f.FullDamageRange/100,0)}m</dd>
+      <dt>피해 0 거리</dt><dd>${num(f.ZeroDamageRange/100,0)}m</dd>
+    </dl></div>
+    <div class="panel"><dl class="kv">
+      <dt>기본 분산</dt><dd>${num(f.Dispersion,3)}</dd>
+      <dt>조준 수렴 속도</dt><dd>×${num(f.AimingSpeedFactor)}</dd>
+      <dt>이동 중 분산</dt><dd>×${num(f.ChassisMoveDispersionFactor)}</dd>
+      <dt>차체 회전 분산</dt><dd>×${num(f.ChassisRotateDispersionFactor)}</dd>
+      <dt>포탑 회전 분산</dt><dd>×${num(f.TurretRotateDispersionFactor)}</dd>
+      <dt>사격 후 분산</dt><dd>×${num(f.ShotDispersionFactor)}</dd>
+      <dt>분산 시그마</dt><dd>${num(f.DispersionSigmaCoefficient)}</dd>
+    </dl></div>
+    <div class="panel"><dl class="kv">
+      <dt>포탑 회전</dt><dd>${num(f.TurretRotationSpeed)}°/s</dd>
+      <dt>포신 회전</dt><dd>${num(f.GunRotationSpeed)}°/s</dd>
+      <dt>포탑 각도</dt><dd>${num(f.MinTurretAngle)}° ~ ${num(f.MaxTurretAngle)}°</dd>
+      <dt>부앙각</dt><dd>${num(f.MinGunAngle)}° ~ ${num(f.MaxGunAngle)}°</dd>
+      <dt>저격 시야(FOV)</dt><dd>${num(f.SniperModeMinFOV)} ~ ${num(f.SniperModeMaxFOV)}</dd>
+    </dl></div>
+    <div class="panel"><h3>포탄 <span class="small muted">${esc(p.row || "")}</span></h3><dl class="kv">
+      <dt>초속</dt><dd>${num((p.InitialSpeed||0)/100,0)}m/s</dd>
+      <dt>중력 계수</dt><dd>${num(p.GravityScale)}</dd>
+      <dt>관통</dt><dd>${num(p.Penetration)}</dd>
+      <dt>약점/일반 배율</dt><dd>×${num(p.WeakDamageMultiplier)} / ×${num(p.NormalDamageMultiplier)}</dd>
+      <dt>치명타 배율</dt><dd>×${num(p.CritDamageMultiplier)}</dd>
+      <dt>초치명 배율·확률</dt><dd>×${num(p.SuperCritDamageMultiplier)} · ${num((p.SuperCritChance||0)*100)}%</dd>
+      <dt>충격 등급</dt><dd>${num(p.ImpactLevel)} ${esc(p.DamageImpactType||"")}</dd>
+      ${p.bDealAOEDamage ? `<dt>범위 피해</dt><dd>${num(p.FullDamageRadius/100)}m / ${num(p.LinearDamageRadius/100)}m</dd>` : ""}
+      ${p.bIsChargeAbility ? `<dt>충전형</dt><dd>예</dd>` : ""}
+    </dl></div>
+  </div>
+
+  <h2>에너지와 차체</h2>
+  <div class="grid g-3">
+    <div class="panel"><dl class="kv">
+      <dt>최대 에너지</dt><dd>${num(e.EnergyMax)}</dd>
+      <dt>파워 무브 비용</dt><dd>${num(e.AbilityEnergyCost)}</dd>
+      <dt>시작 에너지</dt><dd>${num(e.StartEnergy)}</dd>
+      <dt>초당 충전</dt><dd>${num(e.EnergyPerSecond)}</dd>
+      <dt>타격당 충전</dt><dd>${num(e.EnergyPerHit)}</dd>
+      <dt>파워 무브까지 <small>초당 충전만</small></dt><dd>${e.EnergyPerSecond ? num((e.AbilityEnergyCost - e.StartEnergy)/e.EnergyPerSecond,0) + "초" : "–"}</dd>
+    </dl></div>
+    <div class="panel"><dl class="kv">
+      <dt>보조 장비 충전 수</dt><dd>${num(e.SecondaryCharges)} <small class="muted">(시작 ${num(e.SecondaryChargesStart)})</small></dd>
+      <dt>보조 충전 시간</dt><dd>${num(e.SecondaryChargeTime)}초</dd>
+      <dt>사용당 소모</dt><dd>${num(e.SecondaryCostInCharges)}</dd>
+      <dt>보조 쿨다운</dt><dd>${num(e.SecondaryCooldown)}초</dd>
+    </dl></div>
+    <div class="panel"><dl class="kv">
+      <dt>충돌 강도</dt><dd>${num(b.RammingStrength)}</dd>
+      <dt>자동 수리 한도/속도</dt><dd>${num(b.HealLimit)} / ${num(b.HealRate)}</dd>
+      <dt>출발 부스트</dt><dd>×${num(b.StartupEngineBoostMagnitude)} · ${num(b.StartupEngineBoostDuration)}초</dd>
+      <dt>차량 질량</dt><dd>${num(m.OverrideVehicleMass)}kg</dd>
+      <dt>엔진 추가 출력</dt><dd>${num(m.EngineExtraPowerRatio)}</dd>
+      <dt>선회 속도</dt><dd>${num(m.SteeringAngularSpeed)}°/s</dd>
+      <dt>제동력</dt><dd>${num(m.BrakeForce)}</dd>
+    </dl></div>
+    <div class="panel"><h3>엔진 토크 곡선</h3><p class="small muted">가로축은 게임 내부 속도 단위, 세로축은 토크 배율입니다.</p>${spark(t.torque) || '<p class="muted">곡선 없음</p>'}</div>
+  </div>
+
+  <h2>부품 슬롯</h2>
+  <p class="muted small">슬롯마다 하나를 골라 장착합니다. 해제 비용은 크레딧 기준입니다.</p>
+  <div class="grid g-3">${t.slots.map((s, i) => `<div class="slot"><h3>슬롯 ${i+1} <span class="small muted">${esc(D.slotDef[i]?.type || "")}</span></h3>${s.map(pid => { const pt = D.parts[pid]; return pt ? `<div class="opt"><b>${L(pt.name) || esc(pt.key)}</b><div class="small">${L(pt.desc)}</div><div class="small muted">${costs(pt.cost)}${pt.ability ? " · " + esc(pt.ability) : ""}</div></div>` : `<div class="opt muted">#${pid}</div>`; }).join("")}</div>`).join("") || '<p class="muted">부품 정보 없음</p>'}</div>
+
+  ${t.enh.length ? `<h2>강화 단계</h2><div class="panel scroll"><table class="tbl"><tr><th>단계</th><th>효과</th></tr>${t.enh.map(x => `<tr><td>+${x.lv}</td><td>${modText(x.mod)}</td></tr>`).join("")}</table></div>` : ""}
+
+  <h2>사용 가능한 칩 <span class="small muted">${t.chips.length}개</span></h2>
+  ${t.chips.length ? `<div class="row">${t.chips.map(c => { const ch = D.chips[c]; return ch ? `<a href="#chips/${c}" class="pill ${chipCls(ch.rarity)}" style="text-decoration:none">${L(ch.name) || c}</a>` : ""; }).join("")}</div>` : '<p class="muted">칩 풀이 지정되지 않았습니다.</p>'}
+
+  <h2>스킨 <span class="small muted">${t.skins.length}개</span></h2>
+  <div class="scroll panel"><table class="tbl"><tr><th>이름</th><th>종류</th><th class="n">가격</th><th>비고</th></tr>${t.skins.map(sid => { const s = D.skins[sid]; return `<tr><td>${L(s.name) || sid}</td><td>${SKINKIND[s.kind]}</td><td class="n">${s.cost ? costs(s.cost) : "기본"}</td><td>${s.hidden ? '<span class="pill hid">숨김</span> ' : ""}${s.fx ? '<span class="pill">로비 이펙트</span>' : ""}</td></tr>`; }).join("")}</table></div>
+
+  <h2>게임에서 볼 수 없는 값</h2>
+  <div class="panel"><dl class="kv">
+    ${Object.entries({CapturePriority:"점령 우선순위", CaptureSpeedFactor:"점령 속도 계수", PlayerDisconnectedBotLevel:"접속 끊김 시 대체 봇 레벨", CallingCardId:"콜링카드 ID", ProjectileRowName:"포탄 설정 행", bInDevelopment:"개발 중 플래그", FirepowerBaseScore:"화력 기본 점수", MobilityBaseScore:"기동 기본 점수", UtilityBaseScore:"유틸 기본 점수", SurvivabiltyBaseScore:"생존 기본 점수", SuitRecommend:"추천 장비 세트", MedalSysName:"메달 내부 이름"}).map(([k,lab]) => `<dt>${lab} <small>${k}</small></dt><dd>${Array.isArray(t.hidden[k]) ? t.hidden[k].map(i => L(D.suits.find(s=>s.id===i)?.name) || i).join(", ") : (typeof t.hidden[k] === "boolean" ? (t.hidden[k] ? "예" : "아니오") : esc(t.hidden[k] ?? "–"))}</dd>`).join("")}
+    <dt>폰 클래스 <small>Pawn</small></dt><dd class="mono">${esc(t.pawn)}</dd>
+    <dt>기본 스킨</dt><dd>${t.defaultSkin}</dd>
+    <dt>체험 로스터 포함</dt><dd>${t.inRoster ? "예" : "아니오"}</dd>
+  </dl></div>
+  <p style="margin-top:18px"><a href="#compare/${t.id}">이 탱크를 다른 탱크와 비교하기</a></p>`;
+  const lv = $("#lv"), out = $("#lvo");
+  const draw = () => {
+    const n = +lv.value, l = lvRow(t, n);
+    out.textContent = "Lv " + n;
+    const mx = k => statMax("lv_" + k, x => lvRow(x, MAXLV)[k]);
+    $("#lvstats").innerHTML = meterRow("내구도", l.hp, mx("hp")) + meterRow("장갑", l.ar, mx("ar")) + meterRow("기본 피해", l.dmg, mx("dmg")) +
+      meterRow("추정 DPS", dps(t, n), statMax("dps", x => dps(x, MAXLV)), "", false, "피해량 × 탄창 ÷ (재장전 + (탄창−1) × 발간 장전). 스킬·특성·치명타 제외") +
+      `<p class="small muted" style="margin-top:8px">다음 레벨 비용: ${costs((t.levels.find(x => x.lv === n + 1) || {}).cost)}</p>`;
+  };
+  lv.addEventListener("input", draw); draw();
+}
+const SKINKIND = {default:"기본", silver:"실버 도색", gold:"골드 도색", camo:"위장 패턴", epic:"영웅", legendary:"전설", season:"시즌", event:"이벤트", other:"기타"};
+const chipCls = r => ({Silver:"r1", Golden:"r4", Prismatic:"r3"}[r] || "");
+const CHIPR = {Silver:"실버", Golden:"골드", Prismatic:"프리즘"};
+
+// ---------- 비교 ----------
+function compare(ids) {
+  let sel = (ids || "").split(",").map(Number).filter(i => TANK[i]);
+  if (!sel.length) sel = [20006, 20018, 20007];
+  while (sel.length < 2) sel.push(D.tanks.find(t => !sel.includes(t.id)).id);
+  let lv = MAXLV;
+  const options = cur => D.tanks.map(t => `<option value="${t.id}" ${t.id===cur?"selected":""}>${strip(tname(t))} (${esc(t.model)})</option>`).join("");
+  const ROWS = [
+    ["내구도", t => lvRow(t,lv).hp, 1], ["장갑", t => lvRow(t,lv).ar, 1], ["기본 피해", t => lvRow(t,lv).dmg, 1], ["추정 DPS", t => dps(t,lv), 1],
+    ["재장전(초)", t => t.fire.ClipReloadTime, -1], ["탄창", t => t.fire.MagazineCapacity, 1], ["기본 분산", t => t.fire.Dispersion, -1],
+    ["조준 수렴", t => t.fire.AimingSpeedFactor, 1], ["이동 중 분산", t => t.fire.ChassisMoveDispersionFactor, -1], ["포탑 회전(°/s)", t => t.fire.TurretRotationSpeed, 1],
+    ["최대 피해 거리(m)", t => t.fire.FullDamageRange/100, 1], ["포탄 초속(m/s)", t => (t.proj?.InitialSpeed||0)/100, 1], ["치명타 배율", t => t.proj?.CritDamageMultiplier, 1],
+    ["초치명 확률(%)", t => (t.proj?.SuperCritChance||0)*100, 1], ["타격당 에너지", t => t.energy.EnergyPerHit, 1], ["초당 에너지", t => t.energy.EnergyPerSecond, 1],
+    ["파워 무브 비용", t => t.energy.AbilityEnergyCost, -1], ["질량(kg)", t => t.move.OverrideVehicleMass, 0], ["선회(°/s)", t => t.move.SteeringAngularSpeed, 1],
+    ["충돌 강도", t => t.energy && t.body.RammingStrength, 1],
+  ];
+  const draw = () => {
+    const ts = sel.map(i => TANK[i]);
+    $("#cmp").innerHTML = `<table class="tbl"><tr><th></th>${ts.map(t => `<th style="color:${RC[t.rarity]}"><a href="#t/${t.id}">${tname(t)}</a><div class="small muted">${rolename(t.role)} · ${typename(t.type)}</div></th>`).join("")}</tr>
+      <tr><td class="muted">파워 무브</td>${ts.map(t => `<td>${L(t.skill.name)}</td>`).join("")}</tr>
+      <tr><td class="muted">고유 특성</td>${ts.map(t => `<td>${L(t.trait.name)}</td>`).join("")}</tr>
+      ${ROWS.map(([lab, f, dir]) => { const vs = ts.map(f); const best = dir ? (dir > 0 ? Math.max(...vs.filter(v=>v!=null)) : Math.min(...vs.filter(v=>v!=null))) : null;
+        return `<tr><td class="muted">${lab}</td>${vs.map(v => `<td class="${dir && v === best && new Set(vs).size > 1 ? "best" : ""}">${num(v)}</td>`).join("")}</tr>`; }).join("")}</table>`;
+    history.replaceState(null, "", "#compare/" + sel.join(","));
+  };
+  app.innerHTML = `<h1>탱크 비교</h1><p class="lead">최대 4대까지 같은 레벨에서 비교합니다. 초록색이 그 줄에서 가장 유리한 값입니다.</p>
+  <div class="filters" id="pick">${sel.map((id, i) => `<select data-i="${i}" aria-label="탱크 ${i+1}">${options(id)}</select>`).join("")}
+    ${sel.length < 4 ? `<button type="button" id="add" class="pill" style="cursor:pointer;background:none;padding:6px 12px">탱크 추가</button>` : ""}
+    <label class="row small">레벨 <input type="range" id="clv" min="1" max="${MAXLV}" value="${lv}" style="accent-color:var(--hazard)"> <output id="clvo">${lv}</output></label></div>
+  <div class="panel scroll" id="cmp"></div>`;
+  app.querySelectorAll("#pick select").forEach(s => s.addEventListener("input", () => { sel[+s.dataset.i] = +s.value; draw(); }));
+  $("#add")?.addEventListener("click", () => { sel.push(D.tanks.find(t => !sel.includes(t.id)).id); compare(sel.join(",")); });
+  $("#clv").addEventListener("input", e => { lv = +e.target.value; $("#clvo").textContent = lv; draw(); });
+  draw();
+}
+
+// ---------- 스킬·특성 ----------
+function skills() {
+  app.innerHTML = `<h1>스킬·특성</h1><p class="lead">탱크마다 파워 무브(궁극기) 하나와 고유 특성 하나를 가집니다. <i class="ph">{값}</i> 표시는 게임이 부품·레벨에 따라 채우는 숫자입니다.</p>
+  <div class="filters"><input type="search" id="q" placeholder="스킬·특성 이름이나 설명 검색" aria-label="검색"><span class="count" id="cnt"></span></div><div class="grid g-2" id="list"></div>`;
+  const draw = () => {
+    const q = $("#q").value.trim().toLowerCase();
+    const ts = D.tanks.filter(t => !q || strip([L(t.name), L(t.skill.name), L(t.skill.desc), L(t.trait.name), L(t.trait.desc), t.model].join(" ")).toLowerCase().includes(q));
+    $("#cnt").textContent = ts.length + "대";
+    $("#list").innerHTML = ts.map(t => `<section class="panel" style="--rc:${RC[t.rarity]}"><div class="row" style="justify-content:space-between"><a href="#t/${t.id}" style="font:20px var(--display);text-decoration:none">${tname(t)}</a><span class="row">${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span>${stPill(t)}</span></div>
+      <div class="ability" style="margin-top:10px"><div class="ttl"><span class="pill">파워 무브</span><b>${L(t.skill.name)}</b></div><p class="small">${L(t.skill.desc)}</p></div>
+      <div class="ability" style="margin-bottom:0"><div class="ttl"><span class="pill">특성</span><b>${L(t.trait.name)}</b></div><p class="small">${L(t.trait.desc)}</p></div></section>`).join("");
+  };
+  $("#q").addEventListener("input", draw); draw();
+}
+
+// ---------- 부품 ----------
+function partGroup(p) {
+  const k = p.key || "";
+  let m = k.match(/LOC_MODIFY_(\d{5})_/); if (m) return "t" + m[1];
+  if (/LOC_Gear/i.test(k)) return "gear";
+  m = k.match(/LOC_MODIFY_([A-Z]+)_/); if (m) return "m" + m[1];
+  return "etc";
+}
+function parts() {
+  const groups = {};
+  Object.values(D.parts).forEach(p => (groups[partGroup(p)] ||= []).push(p));
+  const gname = g => g === "gear" ? "공용 장비(기어)" : g === "etc" ? "기타" : g[0] === "t" ? (TANK[g.slice(1)] ? strip(tname(TANK[g.slice(1)])) + " 전용" : g.slice(1)) : (D.manu[g.slice(1)] ? strip(manuname(g.slice(1))) + " 제조사" : g.slice(1));
+  const order = Object.keys(groups).sort((a,b) => (a==="gear"?-1:0) - (b==="gear"?-1:0) || a.localeCompare(b));
+  app.innerHTML = `<h1>부품</h1><p class="lead">탱크 개조 슬롯에 끼우는 부품 ${Object.keys(D.parts).length}종입니다. 탱크 전용 부품, 모든 탱크가 쓰는 기어, 제조사 부품으로 나눴습니다.</p>
+  <div class="filters"><input type="search" id="q" placeholder="부품 이름·효과 검색" aria-label="검색"><select id="g" aria-label="분류"><option value="">분류: 전체</option>${order.map(g => `<option value="${g}">${esc(gname(g))}</option>`).join("")}</select><span class="count" id="cnt"></span></div><div id="list"></div>`;
+  const draw = () => {
+    const q = $("#q").value.trim().toLowerCase(), gs = $("#g").value; let n = 0;
+    $("#list").innerHTML = order.filter(g => !gs || g === gs).map(g => {
+      const items = groups[g].filter(p => !q || strip(L(p.name) + " " + L(p.desc) + " " + p.ability).toLowerCase().includes(q)); n += items.length;
+      if (!items.length) return "";
+      return `<h2 style="font-size:21px">${esc(gname(g))} <span class="small muted">${items.length}</span></h2><div class="grid g-3">${items.map(p => `<div class="panel"><h3>${L(p.name) || `<span class="muted">${esc(p.key)}</span>`}</h3><p class="small">${L(p.desc)}</p><p class="small muted" style="margin:0">${costs(p.cost)}${p.ability ? " · " + esc(p.ability) : ""}</p></div>`).join("")}</div>`;
+    }).join("") || '<div class="empty">검색 결과가 없습니다.</div>';
+    $("#cnt").textContent = n + "개";
+  };
+  $("#q").addEventListener("input", draw); $("#g").addEventListener("input", draw); draw();
+}
+
+// ---------- 칩 ----------
+function chips(focus) {
+  const list = Object.values(D.chips);
+  const tags = [...new Set(list.flatMap(c => c.tags))].sort();
+  const tagname = tg => D.chipTags[tg] ? strip(L(D.chipTags[tg].name)) : tg.replace("ChipAbility.", "");
+  app.innerHTML = `<h1>칩</h1><p class="lead">칩 광란(ChipBoom) 모드에서 전투 중 고르는 강화입니다. 탱크마다 뽑히는 칩 풀이 다릅니다.</p>
+  <div class="filters"><input type="search" id="q" placeholder="칩 이름·효과 검색" aria-label="검색">
+  <select id="r" aria-label="등급"><option value="">등급: 전체</option>${Object.entries(CHIPR).map(([k,v]) => `<option value="${k}">${v}</option>`).join("")}</select>
+  <select id="tg" aria-label="태그"><option value="">태그: 전체</option>${tags.map(t => `<option value="${esc(t)}">${esc(tagname(t))}</option>`).join("")}</select><span class="count" id="cnt"></span></div><div class="grid g-3" id="list"></div>`;
+  const draw = () => {
+    const q = $("#q").value.trim().toLowerCase(), r = $("#r").value, tg = $("#tg").value;
+    const ls = list.filter(c => (!r || c.rarity === r) && (!tg || c.tags.includes(tg)) && (!q || strip(L(c.name) + " " + L(c.desc)).toLowerCase().includes(q))).sort((a,b) => a.id - b.id);
+    $("#cnt").textContent = ls.length + "개";
+    $("#list").innerHTML = ls.map(c => `<div class="panel" id="chip-${c.id}" ${String(c.id)===focus?'style="outline:2px solid var(--hazard)"':""}><div class="row" style="justify-content:space-between"><h3 style="margin:0">${L(c.name) || c.id}</h3>${c.rarity ? `<span class="pill ${chipCls(c.rarity)}">${CHIPR[c.rarity]}</span>` : '<span class="pill st-upcoming">테이블 없음</span>'}</div>
+      <p class="small" style="margin-top:6px">${L(c.desc)}</p>
+      <div class="row">${c.tags.map(t => `<span class="pill">${esc(tagname(t))}</span>`).join("")}</div>
+      <p class="small muted" style="margin:8px 0 0">${c.tanks.length ? `사용 탱크 ${c.tanks.length}대` : "사용 탱크 없음"}${c.tanks.length && c.tanks.length < 8 ? ": " + c.tanks.map(i => strip(tname(TANK[i]))).join(", ") : ""}</p></div>`).join("");
+    if (focus) document.getElementById("chip-" + focus)?.scrollIntoView({block:"center"});
+    focus = null;
+  };
+  ["q","r","tg"].forEach(i => $("#" + i).addEventListener("input", draw)); draw();
+}
+
+// ---------- 오퍼레이터 ----------
+function operators() {
+  app.innerHTML = `<h1>오퍼레이터</h1><p class="lead">전투에 동행하는 오퍼레이터입니다. 프로필, 고유 스킬, 레벨업 특전을 모았습니다.</p>
+  <div class="grid g-2">${D.operators.sort((a,b)=>a.id-b.id).map(o => `<section class="panel">
+    <div class="row" style="justify-content:space-between"><span style="font:28px var(--display)">${L(o.name)}</span>${o.hidden ? '<span class="pill hid">숨김</span>' : ""}</div>
+    <p class="muted">${L(o.full)}</p>
+    <dl class="kv"><dt>출생</dt><dd>${L(o.born)||"–"}</dd><dt>나이</dt><dd>${L(o.age)||"–"}</dd><dt>전문 분야</dt><dd>${L(o.spec)||"–"}</dd><dt>취미</dt><dd>${L(o.hobby)||"–"}</dd><dt>레벨 단계</dt><dd>${o.levels}</dd><dt>해제 비용</dt><dd>${costs(o.unlock)}</dd><dt>전투 대사 트리거</dt><dd>${o.dialogs}종</dd></dl>
+    ${o.career ? `<details style="margin-top:10px"><summary>경력</summary><p class="small">${L(o.career)}</p></details>` : ""}
+    <div class="ability" style="--rc:var(--hazard);margin-top:12px"><div class="ttl"><span class="pill">스킬</span><b>${L(o.skill.name)}</b></div><p class="small">${L(o.skill.desc)}</p></div>
+    <h3>특전</h3>${o.perks.map(p => `<div class="small" style="padding:5px 0;border-top:1px dashed var(--line)"><b>${L(p.name) || '<span class="muted">이름 없음(미번역)</span>'}</b> ${L(p.desc)}</div>`).join("")}
+  </section>`).join("")}</div>`;
+}
+
+// ---------- 스킨 ----------
+function skins() {
+  const all = Object.values(D.skins);
+  app.innerHTML = `<h1>스킨</h1><p class="lead">탱크별 외형 ${all.length}종. ‘숨김’은 클라이언트에 있지만 목록에 노출하지 않는 스킨입니다.</p>
+  <div class="filters"><input type="search" id="q" placeholder="스킨 이름 검색" aria-label="검색">
+  <select id="tk" aria-label="탱크"><option value="">탱크: 전체</option>${D.tanks.map(t => `<option value="${t.id}">${strip(tname(t))}</option>`).join("")}</select>
+  <select id="kd" aria-label="종류"><option value="">종류: 전체</option>${Object.entries(SKINKIND).map(([k,v]) => `<option value="${k}">${v}</option>`).join("")}</select>
+  <select id="hd" aria-label="노출"><option value="">노출: 전체</option><option value="1">숨김만</option><option value="0">노출만</option></select><span class="count" id="cnt"></span></div><div class="panel scroll"><table class="tbl" id="list"></table></div>`;
+  const draw = () => {
+    const q = $("#q").value.trim().toLowerCase(), tk = $("#tk").value, kd = $("#kd").value, hd = $("#hd").value;
+    const ls = all.filter(s => (!tk || s.tank == tk) && (!kd || s.kind === kd) && (!hd || String(+s.hidden) === hd) && (!q || strip(L(s.name) + " " + L(s.desc)).toLowerCase().includes(q))).sort((a,b) => a.tank - b.tank || a.order - b.order);
+    $("#cnt").textContent = ls.length + "개";
+    $("#list").innerHTML = `<tr><th>스킨</th><th>탱크</th><th>종류</th><th class="n">가격</th><th>설명</th></tr>` + ls.map(s => `<tr><td><b>${L(s.name) || s.id}</b> ${s.hidden ? '<span class="pill hid">숨김</span>' : ""}${s.fx ? ' <span class="pill">로비 이펙트</span>' : ""}</td><td>${TANK[s.tank] ? `<a href="#t/${s.tank}">${tname(TANK[s.tank])}</a>` : s.tank}</td><td>${SKINKIND[s.kind]}</td><td class="n">${s.cost ? costs(s.cost) : "기본"}</td><td class="small">${L(s.desc)}</td></tr>`).join("");
+  };
+  ["q","tk","kd","hd"].forEach(i => $("#" + i).addEventListener("input", draw)); draw();
+}
+
+// ---------- 모드·맵 ----------
+function modes() {
+  const named = D.modes.filter(m => m.name || m.unreleased), other = D.modes.filter(m => !m.name && !m.unreleased);
+  app.innerHTML = `<h1>모드·맵</h1><p class="lead">게임 모드 설정 ${D.modes.length}개와 맵 ${D.maps.length}개. 이름이 없는 항목은 랭크·봇·이벤트용 변형이거나 아직 공개되지 않은 것입니다.</p>
+  <h2>게임 모드</h2><div class="grid g-2">${named.map(m => `<section class="panel"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${L(m.name) || esc(m.type)}</h3><span class="row">${m.unreleased ? '<span class="pill st-upcoming">미공개</span>' : ""}<span class="pill">${esc(m.modeType)}</span></span></div>
+    <p class="small muted">${esc(m.type)} · 설정 ${m.id}</p>${m.desc.map(d => `<p class="small">${L(d)}</p>`).join("")}</section>`).join("")}</div>
+  <details style="margin-top:16px"><summary>이름 없는 모드 설정 ${other.length}개 (랭크·봇·이벤트 변형)</summary><div class="panel scroll"><table class="tbl"><tr><th class="n">ID</th><th>유형</th><th>분류</th><th>게임모드 클래스</th></tr>${other.map(m => `<tr><td class="n">${m.id}</td><td>${esc(m.type)}</td><td>${esc(m.modeType)}</td><td class="mono">${esc(m.cls)}</td></tr>`).join("")}</table></div></details>
+  <h2>맵</h2><div class="panel scroll"><table class="tbl"><tr><th class="n">ID</th><th>이름</th><th>레벨 파일</th><th>상태</th></tr>${D.maps.map(m => `<tr><td class="n">${m.id}</td><td>${L(m.name) || '<span class="muted">이름 없음</span>'}</td><td class="mono">${esc(m.path)}</td><td>${m.disabled ? '<span class="pill hid">비활성</span>' : ""}${!m.name && /NewMode|Stadium|Gym/.test(m.path) ? '<span class="pill st-upcoming">미공개 추정</span>' : ""}${!m.name && !/NewMode|Stadium|Gym/.test(m.path) ? '<span class="pill">변형</span>' : ""}</td></tr>`).join("")}</table></div>
+  <h2>점수 계수 <span class="small muted">전투 결과 점수 계산에 쓰는 값</span></h2>
+  <div class="panel scroll">${objTable(D.scoreFactors)}</div>`;
+}
+function objTable(rows) {
+  const keys = [...new Set(Object.values(rows).flatMap(r => Object.keys(r)))];
+  return `<table class="tbl"><tr><th>행</th>${keys.map(k => `<th class="n">${esc(k)}</th>`).join("")}</tr>${Object.entries(rows).map(([k, r]) => `<tr><td>${esc(k)}</td>${keys.map(c => `<td class="n">${typeof r[c] === "object" ? esc(JSON.stringify(r[c])) : num(r[c])}</td>`).join("")}</tr>`).join("")}</table>`;
+}
+
+// ---------- 성장·보상 ----------
+function growth() {
+  const M = ["ARES","BASALTIC","IMPACT","UNION"];
+  app.innerHTML = `<h1>성장·보상</h1><p class="lead">제조사 평판과 기술 트리, 플레이어 레벨, 리그 등급, 전투 메달, 장비 세트, 소모품, 속성 피해를 모았습니다.</p>
+  <h2>제조사</h2><div class="grid g-2">${M.map(m => `<section class="panel"><span style="font:24px var(--display)">${manuname(m)}</span><p class="small">${L(D.manu[m].desc)}</p>
+    <p class="small muted">소속 탱크 ${D.tanks.filter(t => t.manu === m).length}대: ${D.tanks.filter(t => t.manu === m).map(t => `<a href="#t/${t.id}">${tname(t)}</a>`).join(", ")}</p>
+    <details><summary>기술 노드 ${D.tech.filter(x => x.manu === m).length}개</summary>${D.tech.filter(x => x.manu === m).sort((a,b) => a.tier-b.tier || a.sort-b.sort).map(x => `<div class="small" style="padding:6px 0;border-top:1px dashed var(--line)"><b>${L(x.name)}</b> <span class="muted">${x.tier+1}티어${x.needLv ? ` · 제조사 Lv${x.needLv}` : ""}${x.needTanks ? ` · 탱크 ${x.needTanks}대` : ""}</span><br>${L(x.desc)}<br><span class="muted">${x.levels.map((l,i) => `${i+1}단계(${l.tp}TP): ${modText(l.mod)}`).join(" / ")}</span></div>`).join("")}</details>
+    <details><summary>평판 레벨 ${D.manuLevels[m].length}단계</summary><table class="tbl"><tr><th>Lv</th><th class="n">필요 경험치</th><th>보상</th><th>해제 스킬</th></tr>${D.manuLevels[m].map(l => `<tr><td>${l.lv}${l.key ? " ★" : ""}</td><td class="n">${num(l.exp)}</td><td>${l.reward ? costs(l.reward) : "–"}</td><td>${l.skill || "–"}</td></tr>`).join("")}</table></details>
+  </section>`).join("")}
+  <section class="panel" style="border-style:dashed"><div class="row"><span style="font:24px var(--display)">스피어</span><span class="pill st-upcoming">미공개</span></div><p class="small muted">제조사 열거형(EManufacturerType)의 다섯 번째 값 SPHERE. 평판 테이블·소속 탱크가 아직 없습니다.</p></section></div>
+
+  <h2>리그 등급</h2><div class="row">${D.league.map(l => `<span class="pill">${L(l.name) || l.id}${l.sub ? " " + L(l.sub) : ""}</span>`).join("")}</div>
+  <h2>플레이어 레벨</h2><div class="panel scroll"><table class="tbl"><tr>${D.playerLevels.slice(0,25).map(l => `<th class="n">${l.lv}</th>`).join("")}</tr><tr>${D.playerLevels.slice(0,25).map(l => `<td class="n">${num(l.exp)}</td>`).join("")}</tr><tr>${D.playerLevels.slice(25).map(l => `<th class="n">${l.lv}</th>`).join("")}</tr><tr>${D.playerLevels.slice(25).map(l => `<td class="n">${num(l.exp)}</td>`).join("")}</tr></table><p class="small muted">레벨마다 필요한 경험치</p></div>
+  <h2>전투 메달 <span class="small muted">${D.medals.length}개</span></h2>
+  <div class="filters"><input type="search" id="mq" placeholder="메달 검색" aria-label="메달 검색"></div><div class="panel scroll"><table class="tbl" id="mlist"></table></div>
+  <h2>장비와 세트</h2><div class="grid g-2"><div class="panel scroll"><table class="tbl"><tr><th>장비</th><th>등급</th><th>보정</th></tr>${D.equip.map(e => `<tr><td>${L(e.name)}</td><td>${esc(e.rarity)}</td><td class="small">${e.mods.map(m => D.modifiers[m] ? L(D.modifiers[m].name) || m : m).join(", ")}</td></tr>`).join("")}</table></div>
+    <div class="panel">${D.suits.map(s => `<div class="small" style="padding:6px 0;border-top:1px dashed var(--line)"><b>${L(s.name)}</b> <span class="muted">${esc(s.type)}</span>${s.desc ? `<br>${L(s.desc)}` : ""}<br><span class="muted">${s.sets.map(x => `${x.n}세트: ${modText(x.mod)}`).join(" / ")}</span></div>`).join("")}</div></div>
+  <h2>소모품</h2><div class="grid g-3">${D.consumables.map(c => `<div class="panel"><h3>${L(c.name)}</h3><p class="small">${L(c.desc)}</p><p class="small muted" style="margin:0">전투당 ${costs(c.cost)}${c.module ? " · " + modText(c.module) : ""}</p></div>`).join("")}</div>
+  <h2>속성 상태이상</h2><div class="panel scroll"><table class="tbl"><tr><th>행</th><th>속성</th><th class="n">단계</th><th class="n">최대 누적</th><th class="n">회복 지연(초)</th><th class="n">회복 속도</th><th class="n">디버프 피해 비율</th></tr>${D.elements.map(e => `<tr><td>${esc(e.id)}</td><td>${esc(e.type)}</td><td class="n">${e.lv}</td><td class="n">${num(e.max)}</td><td class="n">${num(e.recDelay)}</td><td class="n">${num(e.recSpeed)}</td><td class="n">${num(e.debuff*100)}%</td></tr>`).join("")}</table></div>
+  <h2>상품</h2><div class="panel scroll"><table class="tbl"><tr><th class="n">ID</th><th>이름</th><th>분류</th><th>설명</th></tr>${D.goods.map(g => `<tr><td class="n">${g.id}</td><td>${L(g.name) || "–"}</td><td>${esc(g.sub)}</td><td class="small">${L(g.desc)}</td></tr>`).join("")}</table></div>`;
+  const md = () => { const q = $("#mq").value.trim().toLowerCase();
+    $("#mlist").innerHTML = `<tr><th>메달</th><th>종류</th><th>등급</th><th class="n">보너스 점수</th><th>조건</th></tr>` + D.medals.filter(m => !q || strip(L(m.name) + L(m.desc)).toLowerCase().includes(q)).map(m => `<tr><td><b>${L(m.name) || "–"}</b> ${m.locOnly ? '<span class="pill st-new">텍스트만</span>' : ""}</td><td>${esc(m.type || "–")}</td><td>${esc(m.grade || "–")}</td><td class="n">${num(m.score)}</td><td class="small">${L(m.desc)}${m.p1 ? ` <span class="muted">(값 ${m.p1}${m.p2 ? ", " + m.p2 : ""})</span>` : ""}</td></tr>`).join(""); };
+  $("#mq").addEventListener("input", md); md();
+}
+
+// ---------- 미공개 ----------
+function hidden() {
+  const H = D.hidden;
+  const up = D.tanks.filter(t => t.status !== "released");
+  app.innerHTML = `<h1>미공개·출시 예정</h1>
+  <p class="lead">클라이언트 ${esc(D.build.version)}에 이미 들어 있지만 게임 안에서 볼 수 없거나 아직 번역되지 않은 데이터입니다. 판단은 데이터 구성으로 한 추정이고, 출시 여부와 시기는 개발사가 정합니다.</p>
+  <div class="hazard-box" style="margin-top:20px"><div class="tape"></div><div class="in">
+  <h2 style="margin-top:0">탱크</h2>
+  <div class="grid g-2">${up.map(t => `<a class="tcard" href="#t/${t.id}" style="--rc:${RC[t.rarity]}"><div class="top">${tankSvg(t, 74)}<div><div class="nm">${tname(t)}</div><div class="md">${esc(t.model)} · ${typename(t.type)} · ${manuname(t.manu)}</div></div></div>
+    <div class="row badges">${stPill(t)}${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span></div>
+    <p class="small" style="margin:8px 0 0">${L(t.skill.name) ? `파워 무브 <b>${L(t.skill.name)}</b>` : ""}${L(t.trait.name) ? ` · 특성 <b>${L(t.trait.name)}</b>` : ""}</p>
+    <p class="small muted" style="margin:4px 0 0">${t.why.map(esc).join(", ")} · Lv${MAXLV} 내구도 ${num(lvRow(t,MAXLV).hp)} / 피해 ${num(lvRow(t,MAXLV).dmg)}</p></a>`).join("")}</div>
+
+  <h2>미공개 게임 모드</h2>
+  <div class="grid g-3">${H.unreleasedModes.map(id => { const m = D.modes.find(x => x.id === id); return `<div class="panel"><h3>${L(m.name) || esc(m.type)}</h3><p class="small muted">내부 유형 ${esc(m.type)} · 설정 ${m.id} · 클래스 ${esc(m.cls || "없음")}</p></div>`; }).join("")}</div>
+  <h2>이름 없는 맵</h2><div class="row">${H.unnamedMaps.map(id => { const m = D.maps.find(x => x.id === id); return `<span class="pill">${m.id} ${esc(m.path)}</span>`; }).join("")}</div>
+  <p class="small muted" style="margin-top:6px">NewMode01~06, Stadium07B, GymHexagon은 기존 맵 변형이 아닌 새 레벨 파일입니다.</p>
+
+  <h2>그 밖의 단서</h2>
+  <div class="grid g-2">
+    <div class="panel"><h3>제조사 ‘스피어’</h3><p class="small">열거형에 SPHERE가 다섯 번째로 정의돼 있지만 평판 테이블과 소속 탱크가 없습니다.</p></div>
+    <div class="panel"><h3>쓰이지 않는 무기 유형</h3><p class="small">${H.unusedWeaponTypes.map(esc).join(", ") || "없음"} — 열거형에는 있지만 현재 어떤 탱크도 쓰지 않습니다.</p></div>
+    <div class="panel"><h3>숨김 스킨 ${H.hiddenSkins.length}개</h3><p class="small">목록에 노출하지 않도록 표시된 스킨입니다. <a href="#skins">스킨 탭</a>에서 ‘숨김만’으로 볼 수 있습니다.</p></div>
+    <div class="panel"><h3>텍스트만 있는 메달 ${H.locOnlyMedals.length}개</h3><p class="small">메달 테이블에는 없고 이름·조건 문구만 있는 메달입니다. <a href="#growth">성장·보상</a> 메달 표에 ‘텍스트만’으로 표시했습니다.</p></div>
+    <div class="panel"><h3>탱크에 배정되지 않은 칩 ${H.noTankChips.length}개</h3><p class="small">${H.noTankChips.map(c => `<a href="#chips/${c}">${L(D.chips[c].name) || c}</a>`).join(", ") || "없음"}</p></div>
+    <div class="panel"><h3>프리즘 등급 칩 ${H.prismaticChips.length}개</h3><p class="small">${H.prismaticChips.map(c => `<a href="#chips/${c}">${L(D.chips[c].name) || c}</a>`).join(", ") || "없음"}</p></div>
+  </div>
+  </div></div>
+
+  <h2>한국어 번역이 없는 문구 <span class="small muted">${Object.values(H.untranslated).reduce((a,b)=>a+b.length,0)}개</span></h2>
+  <p class="muted small">영어판에만 있는 텍스트입니다. 신규 콘텐츠가 번역 전 단계에 있다는 신호로 볼 수 있습니다. 중국판 전용 문구도 섞여 있습니다.</p>
+  ${Object.entries(H.untranslated).sort((a,b) => b[1].length - a[1].length).map(([g, xs]) => `<details class="panel" style="margin-bottom:8px"><summary><b>${esc(g)}</b> <span class="muted">${xs.length}</span></summary><table class="tbl">${xs.map(x => `<tr><td class="mono" style="width:40%">${esc(x.k)}</td><td class="small">${x.en}</td></tr>`).join("")}</table></details>`).join("")}`;
+}
+
+// ---------- 원본 데이터 ----------
+const tcache = {};
+function data(name) {
+  if (!name) {
+    app.innerHTML = `<h1>원본 데이터</h1><p class="lead">클라이언트 DataTable ${D.tables.length}개를 필드 이름 그대로 보여줍니다. 텍스트 키는 한국어로 바꿨고, 에셋 경로는 파일 이름만 남겼습니다.</p>
+    <div class="filters"><input type="search" id="q" placeholder="테이블 이름 검색" aria-label="검색"><span class="count" id="cnt"></span></div><div class="grid g-3" id="list"></div>`;
+    const draw = () => { const q = $("#q").value.trim().toLowerCase(); const ls = D.tables.filter(t => !q || (t.name + t.struct).toLowerCase().includes(q));
+      $("#cnt").textContent = ls.length + "개";
+      $("#list").innerHTML = ls.map(t => `<a class="panel" style="text-decoration:none" href="#data/${encodeURIComponent(t.name)}"><h3>${esc(t.name.replace(/^DT_/, ""))}</h3><p class="small muted" style="margin:0">${t.rows}행 · 구조체 ${esc(t.struct)}</p></a>`).join(""); };
+    $("#q").addEventListener("input", draw); draw(); return;
+  }
+  const meta = D.tables.find(t => t.name === name);
+  if (!meta) { app.innerHTML = `<div class="empty">테이블 ${esc(name)}이 없습니다. <a href="#data">목록으로</a></div>`; return; }
+  app.innerHTML = `<div class="crumbs"><a href="#data">원본 데이터</a> / ${esc(name)}</div><h1 style="font-size:32px">${esc(name)}</h1><p class="muted">${meta.rows}행 · 구조체 ${esc(meta.struct)}</p>
+  <div class="filters"><input type="search" id="q" placeholder="행 안에서 검색" aria-label="행 검색"><span class="count" id="cnt"></span></div><div class="panel scroll" style="max-height:75vh" id="tb"><div class="empty">불러오는 중…</div></div>`;
+  const show = j => {
+    const rows = Object.entries(j.rows);
+    const keys = [...new Set(rows.flatMap(([, r]) => r && typeof r === "object" ? Object.keys(r) : []))];
+    const cell = v => v == null ? '<span class="muted">–</span>' : (typeof v === "object" ? (v.$t !== undefined ? esc(v.$t) : `<code>${esc(JSON.stringify(v, (k, x) => x && x.$t !== undefined ? x.$t : x)).slice(0, 400)}</code>`) : (typeof v === "number" ? num(v, 4) : esc(v)));
+    let lim = 200;
+    const draw = () => { const q = $("#q").value.trim().toLowerCase();
+      const ls = rows.filter(([k, r]) => !q || (k + JSON.stringify(r)).toLowerCase().includes(q));
+      $("#cnt").textContent = `${ls.length}행`;
+      $("#tb").innerHTML = `<table class="tbl"><tr><th>행</th>${keys.map(k => `<th>${esc(k)}</th>`).join("")}</tr>${ls.slice(0, lim).map(([k, r]) => `<tr><td><b>${esc(k)}</b></td>${keys.map(c => `<td class="small">${cell(r[c])}</td>`).join("")}</tr>`).join("")}</table>${ls.length > lim ? `<p style="padding:10px"><button type="button" class="pill" id="more" style="cursor:pointer;background:none;padding:6px 12px">${ls.length - lim}행 더 보기</button></p>` : ""}`;
+      $("#more")?.addEventListener("click", () => { lim += 400; draw(); }); };
+    $("#q").addEventListener("input", () => { lim = 200; draw(); }); draw();
+  };
+  if (tcache[name]) return show(tcache[name]);
+  fetch("tables/" + meta.file).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => { tcache[name] = j; show(j); })
+    .catch(() => { $("#tb").innerHTML = `<div class="empty">테이블 파일을 불러오지 못했습니다. 새로고침해 보세요.</div>`; });
+}
+
+$("#buildinfo").textContent = `데이터 기준: Tank-a-Boom ${D.build.platform} 클라이언트 ${D.build.version} (빌드 ${D.build.build})`;
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"struct":"BattleScenarioModifierData","rows":{"1":{"Name":{"$t":"芯片狂潮"},"LobbyIcon":"T_matching_mode_iconmark_ChipBoom","TaskIcon":"T_taskicon_Speciallabel_01_ChipBoom"},"2":{"Name":{"$t":"低重力"},"LobbyIcon":"T_matching_mode_iconmark_LowGravity","TaskIcon":"T_taskicon_Speciallabel_02_LowGravity"}}}
