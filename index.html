@@ -57,6 +57,7 @@ p{margin:0 0 10px}
 .small{font-size:13px}
 .ph{font-style:normal;color:var(--hazard);background:rgba(242,194,48,.1);padding:0 3px;border-radius:3px}
 .hl{color:#7fd4ff}
+.unew{color:var(--hazard)} a[aria-current] .unew{color:inherit}
 abbr.term{text-decoration:underline dotted;text-underline-offset:3px;cursor:help}
 
 /* 경고 테이프: 미공개 영역 전용 */
@@ -68,8 +69,8 @@ abbr.term{text-decoration:underline dotted;text-underline-offset:3px;cursor:help
 .panel{background:var(--steel-2);border:1px solid var(--line);border-radius:10px;padding:16px}
 .grid{display:grid;gap:12px}
 .g-cards{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
-.g-2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
-.g-3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g-2{grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))}
+.g-3{grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}
 .pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);white-space:nowrap;line-height:1.6}
 .pill.r1{color:var(--r1);border-color:color-mix(in srgb,var(--r1) 50%,transparent)}
 .pill.r2{color:var(--r2);border-color:color-mix(in srgb,var(--r2) 50%,transparent)}
@@ -930,34 +931,54 @@ function growth() {
 }
 
 // ---------- 미공개 ----------
-function hidden() {
-  const H = D.hidden;
-  const up = D.tanks.filter(t => t.status !== "released");
-  app.innerHTML = `<h1>미공개·출시 예정</h1>
-  <div class="hazard-box" style="margin-top:20px"><div class="tape"></div><div class="in">
-  <h2 style="margin-top:0">탱크</h2>
-  <div class="grid g-2">${up.map(t => `<a class="tcard" href="#t/${t.id}" style="--rc:${RC[t.rarity]}">${t.img ? tankShot(t) : ""}<div class="top">${t.img ? "" : tankSvg(t, 74)}<div><div class="nm">${tname(t)}</div><div class="md">${esc(t.model)} · ${typename(t.type)} · ${manuname(t.manu)}</div></div></div>
-    <div class="row badges">${stPill(t)}${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span></div>
+const UTABS = [["tanks","탱크"],["modes","모드"],["maps","맵"],["skins","스킨"],["parts","부품"],["chips","칩"],["etc","기타"]];
+const UGROUP = {tanks: {upcoming: "출시 예정", tutorial: "튜토리얼 전용"},
+  modes: {dev: "개발 중 신규 모드", variant: "내부 변형(칩·저중력)", test: "테스트 설정"},
+  maps: {dev: "신규 모드용 맵", variant: "변형(이름 미번역)", test: "테스트 맵"}};
+const UWHY = {hidden: "게임 안 숨김", upcoming: "출시 예정 탱크용", unused: "장착 탱크 없음", untranslated: "이름 미번역", locOnly: "문구만 존재"};
+let UNEW = false;   // 이번 업데이트 신규만 보기
+function hidden(tab) {
+  const U = D.unreleased, H = D.hidden, C = U.cats;
+  tab = UTABS.some(([k]) => k === tab) ? tab : "tanks";
+  const isNew = x => x.since === U.latest;
+  const since = x => isNew(x) ? `<span class="pill st-new">${esc(U.latest)} 신규</span>` : "";
+  const why = x => (x.why || []).map(r => `<span class="pill${r === "hidden" ? " hid" : ""}">${UWHY[r] || esc(r)}</span>`).join("");
+  const items = k => (C[k] || []).filter(x => !UNEW || isNew(x));
+  const grouped = (k, card, grid) => Object.entries(UGROUP[k]).map(([g, lab]) => {
+    const xs = items(k).filter(x => x.g === g);
+    return xs.length ? `<h2 style="font-size:20px">${lab} <span class="small muted">${xs.length}</span></h2><div class="grid ${grid}">${xs.map(card).join("")}</div>` : "";
+  }).join("");
+  const tankCard = x => { const t = TANK[x.id]; return `<a class="tcard" href="#t/${t.id}" style="--rc:${RC[t.rarity]}">${t.img ? tankShot(t) : ""}<div class="top">${t.img ? "" : tankSvg(t, 74)}<div><div class="nm">${tname(t)}</div><div class="md">${esc(t.model)} · ${typename(t.type)} · ${manuname(t.manu)}</div></div></div>
+    <div class="row badges">${stPill(t)}${rPill(t.rarity)}<span class="pill">${rolename(t.role)}</span>${since(x)}</div>
     <p class="small" style="margin:8px 0 0">${L(t.skill.name) ? `파워 무브 <b>${L(t.skill.name)}</b>` : ""}${L(t.trait.name) ? ` · 특성 <b>${L(t.trait.name)}</b>` : ""}</p>
-    <p class="small muted" style="margin:4px 0 0">${t.why.map(esc).join(", ")} · Lv${MAXLV} 내구도 ${num(lvRow(t,MAXLV).hp)} / 피해 ${num(lvRow(t,MAXLV).dmg)}</p></a>`).join("")}</div>
-
-  <h2>미공개 모드</h2>
-  <div class="grid g-3">${H.unreleasedModes.map(id => { const m = D.modes.find(x => x.id === id); return `<div class="panel"><h3>${L(m.name) || esc(m.type)}</h3><p class="small muted">내부 유형 ${esc(m.type)} · 설정 ${m.id} · 클래스 ${esc(m.cls || "없음")}</p></div>`; }).join("")}</div>
-  <h2>이름 없는 맵</h2><div class="row">${H.unnamedMaps.map(id => { const m = D.maps.find(x => x.id === id); return `<span class="pill">${m.id} ${esc(m.path)}</span>`; }).join("")}</div>
-
-  <h2>기타</h2>
-  <div class="grid g-2">
+    <p class="small muted" style="margin:4px 0 0">${t.why.map(esc).join(", ")} · Lv${MAXLV} 내구도 ${num(lvRow(t,MAXLV).hp)} / 피해 ${num(lvRow(t,MAXLV).dmg)}</p></a>`; };
+  const modeCard = x => { const m = D.modes.find(y => y.id === x.id); return `<section class="panel">${m.bg ? `<img src="img/${encodeURIComponent(m.bg)}.webp" alt="" loading="lazy" style="width:100%;aspect-ratio:21/9;object-fit:cover;border-radius:6px;margin-bottom:10px;display:block">` : ""}
+    <div class="row" style="justify-content:space-between"><h3 style="margin:0" class="row">${IMG(m.icon, L(m.name), "ico", 'width="32" height="32"')}${L(m.name) || esc(m.type)}</h3>${since(x)}</div>
+    <p class="small muted mono" style="margin:6px 0 0">${esc(m.type)} · 설정 ${m.id}${m.cls ? " · " + esc(m.cls) : ""}</p>${(m.desc || []).map(d => `<p class="small">${L(d)}</p>`).join("")}</section>`; };
+  const mapCard = x => { const m = D.maps.find(y => y.id === x.id), cap = strip(L(m.name) || m.path); return `<div class="mapcard">${m.bg ? `<img src="img/${encodeURIComponent(m.bg)}.webp" alt="${esc(cap)}" loading="lazy" data-zoom="${esc(m.bg)}" data-cap="${esc(cap)}" style="cursor:zoom-in">` : ""}
+    <div class="in"><div class="row" style="justify-content:space-between"><b>${L(m.name) || esc(m.path)}</b>${m.mini ? `<button type="button" class="pill" style="cursor:zoom-in;background:none" data-zoom="${esc(m.mini)}" data-cap="${esc(cap)} 미니맵">미니맵</button>` : ""}</div>
+    <div class="small muted">${m.id} · <span class="mono">${esc(m.path)}</span></div><div class="row" style="margin-top:4px">${m.disabled ? '<span class="pill hid">비활성</span>' : ""}${since(x)}</div></div></div>`; };
+  const skinItem = x => { const sk = D.skins[x.id], t = TANK[sk.tank]; return `<div>${skinCard(sk)}<div class="row small" style="margin-top:4px;gap:4px">${t ? `<a href="#t/${t.id}">${tname(t)}</a>` : ""}${why(x)}${since(x)}</div></div>`; };
+  const partItem = x => { const p = D.parts[x.id]; return `<div class="panel">${IMG(p.icon, L(p.name), "ico lg")}<h3>${L(p.name) || `<span class="muted">${esc(p.key)}</span>`}</h3><p class="small">${L(p.desc)}</p>
+    <div class="row small" style="gap:4px">${why(x)}${since(x)}</div>${x.tanks.length ? `<p class="small muted" style="margin:6px 0 0">장착: ${x.tanks.map(id => `<a href="#t/${id}">${tname(TANK[id])}</a>`).join(", ")}</p>` : ""}</div>`; };
+  const chipItem = x => { const c = D.chips[x.id]; return `<div class="panel"><h3><a href="#chips/${x.id}">${L(c.name) || x.id}</a></h3><p class="small">${L(c.desc)}</p><div class="row small" style="gap:4px">${why(x)}${since(x)}</div></div>`; };
+  const flat = (k, card, grid) => { const xs = items(k); return xs.length ? `<div class="${grid === "skins" ? "skins" : "grid " + grid}">${xs.map(card).join("")}</div>` : ""; };
+  const etc = () => `<div class="grid g-2">
     <div class="panel"><h3>제조사 ‘스피어’</h3><p class="small">EManufacturerType::SPHERE · 평판 테이블·소속 탱크 없음</p></div>
     <div class="panel"><h3>미사용 무기 유형</h3><p class="small">${H.unusedWeaponTypes.map(esc).join(", ") || "없음"}</p></div>
-    <div class="panel"><h3>숨김 스킨 ${H.hiddenSkins.length}개</h3><p class="small"><a href="#skins">스킨 보기</a></p></div>
     <div class="panel"><h3>미구현 메달 ${H.locOnlyMedals.length}개</h3><p class="small"><a href="#growth">메달 보기</a></p></div>
-    <div class="panel"><h3>미배정 칩 ${H.noTankChips.length}개</h3><p class="small">${H.noTankChips.map(c => `<a href="#chips/${c}">${L(D.chips[c].name) || c}</a>`).join(", ") || "없음"}</p></div>
     <div class="panel"><h3>프리즘 등급 칩 ${H.prismaticChips.length}개</h3><p class="small">${H.prismaticChips.map(c => `<a href="#chips/${c}">${L(D.chips[c].name) || c}</a>`).join(", ") || "없음"}</p></div>
   </div>
-  </div></div>
-
   <h2>미번역 문구 <span class="small muted">${Object.values(H.untranslated).reduce((a,b)=>a+b.length,0)}개</span></h2>
   ${Object.entries(H.untranslated).sort((a,b) => b[1].length - a[1].length).map(([g, xs]) => `<details class="panel" style="margin-bottom:8px"><summary><b>${esc(g)}</b> <span class="muted">${xs.length}</span></summary><table class="tbl">${xs.map(x => `<tr><td class="mono" style="width:40%">${esc(x.k)}</td><td class="small">${x.en}</td></tr>`).join("")}</table></details>`).join("")}`;
+  const body = {tanks: () => grouped("tanks", tankCard, "g-2"), modes: () => grouped("modes", modeCard, "g-2"), maps: () => grouped("maps", mapCard, "g-3"),
+    skins: () => flat("skins", skinItem, "skins"), parts: () => flat("parts", partItem, "g-3"), chips: () => flat("chips", chipItem, "g-3"), etc}[tab]();
+  const cnt = k => { if (k === "etc") return ""; const n = C[k].length, nn = C[k].filter(isNew).length; return ` <span class="muted">${n}</span>${nn ? ` <b class="unew">+${nn}</b>` : ""}`; };
+  app.innerHTML = `<h1>미공개·출시 예정</h1>
+  <nav class="row" style="margin:16px 0 10px;gap:6px" aria-label="미공개 분류">${UTABS.map(([k, lab]) => `<a class="pill" href="#hidden/${k}" style="text-decoration:none;padding:4px 12px;${k === tab ? "background:var(--hazard);color:var(--hazard-ink);border-color:var(--hazard)" : ""}"${k === tab ? ' aria-current="true"' : ""}>${lab}${cnt(k)}</a>`).join("")}</nav>
+  ${tab === "etc" ? "" : `<label class="row small" style="gap:6px;margin-bottom:12px;cursor:pointer"><input type="checkbox" id="unew" ${UNEW ? "checked" : ""}>${esc(U.latest)} 업데이트에서 새로 생긴 것만</label>`}
+  <div class="hazard-box"><div class="tape"></div><div class="in">${body || '<div class="empty">해당 항목 없음</div>'}</div></div>`;
+  $("#unew")?.addEventListener("change", e => { UNEW = e.target.checked; hidden(tab); });
 }
 
 // ---------- 이미지 갤러리 ----------
