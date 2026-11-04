@@ -30,10 +30,14 @@ button,select,input{font:inherit;color:inherit}
 header.top{position:sticky;top:0;z-index:20;background:rgba(30,47,61,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
 .bar{display:flex;align-items:center;gap:14px;height:56px}
 .brand{font:22px/1 var(--display);letter-spacing:.5px;text-decoration:none;white-space:nowrap}
-.brand small{font:500 12px var(--body);color:var(--ink-3);margin-left:8px;letter-spacing:0}
+.maker{display:inline-flex;align-items:center;gap:7px;padding:5px 13px 5px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(10,18,26,.45);font:500 14px/1 var(--body);color:var(--ink-3);white-space:nowrap;text-decoration:none}
+.maker svg{flex:none}
+.maker b{font:800 14px/1 var(--body);letter-spacing:.14em;color:var(--r4)}
 .bar .sp{flex:1}
 .lang{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
-.lang button{background:none;border:0;padding:4px 10px;cursor:pointer;color:var(--ink-3)}
+.lang{flex:none}
+.lang button{background:none;border:0;padding:4px 10px;cursor:pointer;color:var(--ink-3);white-space:nowrap}
+.lshort{display:none}
 .lang button[aria-pressed=true]{background:var(--steel-3);color:var(--ink)}
 nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
 nav.tabs::-webkit-scrollbar{display:none}
@@ -189,15 +193,20 @@ b.val{color:var(--ok);font-weight:700}
 @media (max-width:860px){.bgrid{grid-template-columns:1fr}.sticky{position:static}}
 td img.cell{width:44px;height:44px;object-fit:contain;vertical-align:middle;background:var(--steel);border-radius:4px}
 
-footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:13px;padding:22px 0 40px}
-footer p{max-width:80ch}
 
 @media (max-width:760px){
   .hero{grid-template-columns:1fr}
   .dhead{grid-template-columns:1fr}
   .dhead svg{width:150px;height:auto}
   .stat{grid-template-columns:96px 1fr 58px}
-  .brand small{display:none}
+  .bar{gap:7px}
+  .brand{font-size:16px;letter-spacing:0}
+  .maker{padding:4px 8px 4px 7px;font-size:11px;gap:4px}
+  .maker svg{width:14px;height:14px}
+  .maker b{font-size:11px;letter-spacing:.08em}
+  .lang button{padding:4px 6px;font-size:12.5px}
+  .lfull{display:none} .lshort{display:inline}
+  .brand{min-width:0;overflow:hidden;text-overflow:ellipsis}
 }
 @media (prefers-reduced-motion:no-preference){
   .hero .lineup svg{animation:roll .7s cubic-bezier(.2,.8,.2,1) both}
@@ -209,10 +218,11 @@ footer p{max-width:80ch}
 <header class="top">
   <div class="wrap">
     <div class="bar">
-      <a class="brand" href="#">탱크어붐 데이터 도감<small>비공식 · 클라이언트 데이터 기준</small></a>
+      <a class="brand" href="#">탱크어붐 데이터 도감</a>
+      <span class="maker" aria-label="MAMMON 제작"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--r4)" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l4.5 4L12 5l4.5 6L21 7l-2 11H5z"/></svg>by <b>MAMMON</b></span>
       <span class="sp"></span>
       <div class="lang" role="group" aria-label="이름 표기 언어">
-        <button type="button" data-lang="ko" aria-pressed="true">한국어</button>
+        <button type="button" data-lang="ko" aria-pressed="true"><span class="lfull">한국어</span><span class="lshort">KO</span></button>
         <button type="button" data-lang="en" aria-pressed="false">EN</button>
       </div>
     </div>
@@ -235,13 +245,6 @@ footer p{max-width:80ch}
 </header>
 <main class="wrap" id="app" tabindex="-1"></main>
 <dialog class="lb" id="lb"><button type="button" id="lbx">닫기</button><img id="lbimg" alt=""><p id="lbcap"></p></dialog>
-<footer>
-  <div class="wrap">
-    <p>비공식 팬 사이트입니다. 게임 이름·이미지·텍스트 등 콘텐츠의 권리는 개발사와 각 권리자에게 있으며, 이미지는 게임 클라이언트에 들어 있는 UI 이미지를 그대로 옮긴 것입니다.</p>
-    <p id="buildinfo"></p>
-    <p>‘출시 예정’ 표시는 번역 유무·스킨·칩 구성으로 판단한 추정입니다. 실제 출시 일정과 다를 수 있고, 서버 쪽 설정(가격·확률·이벤트)은 반영되지 않습니다.</p>
-  </div>
-</footer>
 <script src="data.js"></script>
 <script>
 "use strict";
@@ -1029,7 +1032,6 @@ function data(name) {
     .catch(() => { $("#tb").innerHTML = `<div class="empty">테이블 파일을 불러오지 못했습니다. 새로고침해 보세요.</div>`; });
 }
 
-$("#buildinfo").textContent = `데이터 기준: Tank-a-Boom ${D.build.platform} 클라이언트 ${D.build.version} (빌드 ${D.build.build})`;
 render();
 </script>
 </body>
