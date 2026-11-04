@@ -1,0 +1,1 @@
+{"struct":"ShopBundleTabData","rows":{"0":{"TabIcon":{"$img":"T_shop_tabicon_03"},"TabBG":null,"TabColor":[1.0,1.0,1.0,1.0]},"1":{"TabIcon":{"$img":"T_shop_tabicon_04"},"TabBG":null,"TabColor":[1.0,1.0,1.0,1.0]},"2":{"TabIcon":{"$img":"T_shop_tabicon_09"},"TabBG":{"$img":"T_shop_tab_BG02"},"TabColor":[1.0,1.0,1.0,1.0]}}}
