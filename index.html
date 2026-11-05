@@ -498,10 +498,14 @@ function dispLabel(k) {
   const ko = w.map(x => VW[x] ?? null);
   return ko.every(x => x !== null) ? ko.filter(Boolean).join(" ") : "";
 }
-function dispVal(k, v) {
-  const one = x => {
+function dispVal(k, v, u) {
+  const UNIT = {"m": x => num(x / 100, 1) + "m", "m/s": x => num(x / 100, 1) + "m/s", "m/s²": x => num(x / 100, 1) + "m/s²",
+    "%": x => num(x * 100, 1) + "%", "%p": x => num(x, 1) + "%", "초": x => num(x, 2) + "초", "°": x => num(x, 1) + "°", "°/s": x => num(x, 1) + "°/s",
+    "x": x => "×" + num(x, 2), "": x => num(x, 2)};
+  const one = u !== undefined ? (UNIT[u] || (x => num(x, 2) + u)) : x => {
     if (/Range|Distance|Radius|Height/.test(k) && Math.abs(x) >= 100) return num(x / 100, 1) + "m";
     if (/Ratio|Factor|Chance|Multiplier/.test(k) && Math.abs(x) <= 5) return num(x * 100, 1) + "%";
+    if (/Increase|Decrease|Reduce|Rate/.test(k) && !/Time|Speed|Num|Count/.test(k) && Math.abs(x) <= 1) return num(x * 100, 1) + "%";
     if (/Duration|Time|Delay|Cooldown|Interval/.test(k)) return num(x, 2) + "초";
     return num(x, 2);
   };
@@ -510,10 +514,11 @@ function dispVal(k, v) {
 function dispTable(list) {
   if (!list || !list.length) return "";
   // 한글 이름이 있는 값을 먼저 보이고, 번역 안 된 값은 안쪽에 접어 둔다(원래 이름을 띄어 써서 표시)
-  const row = (lab, k, v) => `<tr><td>${lab}</td><td><b>${dispVal(k, v)}</b></td></tr>`;
-  const ko = list.filter(([k]) => dispLabel(k)), en = list.filter(([k]) => !dispLabel(k));
-  const enT = en.length ? `<details class="vals sub"><summary>번역 안 된 항목 ${en.length}개 (원래 이름)</summary><table>${en.map(([k, v]) => row(`<span class="small muted">${esc(k.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[._]/g, " "))}</span>`, k, v)).join("")}</table></details>` : "";
-  return `<details class="vals"><summary>세부 수치 ${list.length}개 (게임 데이터)</summary>${ko.length ? `<table>${ko.map(([k, v]) => row(esc(dispLabel(k)), k, v)).join("")}</table>` : ""}${enT}</details>`;
+  const row = (l, [k, v, , u]) => `<tr><td>${l}</td><td><b>${dispVal(k, v, u)}</b></td></tr>`;
+  const lab = e => e[2] || dispLabel(e[0]);
+  const ko = list.filter(e => lab(e)), en = list.filter(e => !lab(e));
+  const enT = en.length ? `<details class="vals sub"><summary>번역 안 된 항목 ${en.length}개 (원래 이름)</summary><table>${en.map(e => row(`<span class="small muted">${esc(e[0].replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[._]/g, " "))}</span>`, e)).join("")}</table></details>` : "";
+  return `<details class="vals"><summary>세부 수치 ${list.length}개 (게임 데이터)</summary>${ko.length ? `<table>${ko.map(e => row(esc(lab(e)), e)).join("")}</table>` : ""}${enT}</details>`;
 }
 function meterRow(lab, val, max, unit="", invert=false, tip="") {
   const pct = max ? Math.max(3, Math.min(100, (invert ? (max / (val || max)) * 40 : val / max * 100))) : 0;
