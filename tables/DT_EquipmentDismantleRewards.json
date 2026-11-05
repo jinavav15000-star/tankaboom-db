@@ -1,1 +1,0 @@
-{"struct":"EquipmentDismantleReward","rows":{"0":{"Rarity":"Rare","DismantleReturnItems":[{"type":"RewardType_Item","id":50301,"count":10}]},"1":{"Rarity":"SuperRare","DismantleReturnItems":[{"type":"RewardType_Item","id":50302,"count":5}]},"2":{"Rarity":"SuperSuperRare","DismantleReturnItems":[{"type":"RewardType_Item","id":50303,"count":1}]}}}

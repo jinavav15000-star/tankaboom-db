@@ -1,1 +1,0 @@
-{"struct":"ChainMissionThemeData","rows":{"1":{"ThemeName":{"$t":"Default"},"EntryBG":{"$img":"T_task_missions_bg1_1"},"EntryBorder":{"$img":"T_task_missions_bg1_2"}},"2":{"ThemeName":{"$t":"New Theme"},"EntryBG":{"$img":"T_task_missions_bg2_1"},"EntryBorder":{"$img":"T_task_missions_bg2_2"}}}}
