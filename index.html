@@ -910,11 +910,13 @@ function parts() {
   const gname = g => g === "gear" ? "공용 장비(기어)" : g === "etc" ? "기타" : g[0] === "t" ? (TANK[g.slice(1)] ? strip(tname(TANK[g.slice(1)])) + " 전용" : g.slice(1)) : (D.manu[g.slice(1)] ? strip(manuname(g.slice(1))) + " 제조사" : g.slice(1));
   const order = Object.keys(groups).sort((a,b) => (a==="gear"?-1:0) - (b==="gear"?-1:0) || a.localeCompare(b));
   app.innerHTML = `<h1>부품</h1>
-  <div class="filters"><input type="search" id="q" placeholder="부품 이름·효과 검색" aria-label="검색"><select id="g" aria-label="분류"><option value="">분류: 전체</option>${order.map(g => `<option value="${g}">${esc(gname(g))}</option>`).join("")}</select><span class="count" id="cnt"></span></div><div id="list"></div>`;
+  <div class="filters"><input type="search" id="q" placeholder="부품 이름·효과 검색" aria-label="검색"><select id="tk" aria-label="탱크"><option value="">탱크: 전체</option>${D.tanks.filter(t => (t.slots || []).some(sl => sl.length)).slice().sort((a, b) => strip(tname(a)).localeCompare(strip(tname(b)), "ko")).map(t => `<option value="${t.id}">${esc(strip(tname(t)))}</option>`).join("")}</select><select id="g" aria-label="분류"><option value="">분류: 전체</option>${order.map(g => `<option value="${g}">${esc(gname(g))}</option>`).join("")}</select><span class="count" id="cnt"></span></div><div id="list"></div>`;
   const draw = () => {
-    const q = $("#q").value.trim().toLowerCase(), gs = $("#g").value; let n = 0;
+    const q = $("#q").value.trim().toLowerCase(), gs = $("#g").value, tk = $("#tk").value; let n = 0;
+    // 탱크를 고르면 그 탱크 장착 칸에 들어 있는 부품 전부(전용 + 제조사 공용 + 공용 장비)
+    const can = tk && TANK[tk] ? new Set(TANK[tk].slots.flat().map(String)) : null;
     $("#list").innerHTML = order.filter(g => !gs || g === gs).map(g => {
-      const hit = groups[g].filter(p => !q || strip(L(p.name) + " " + L(p.desc)).toLowerCase().includes(q));
+      const hit = groups[g].filter(p => (!can || can.has(String(p.id))) && (!q || strip(L(p.name) + " " + L(p.desc)).toLowerCase().includes(q)));
       // 탱크마다 따로 들어 있는 같은 부품(이름·설명·비용이 같음)은 한 장으로 합친다
       const uniq = new Map();
       hit.forEach(p => { const k = L(p.name) + "|" + L(p.desc) + "|" + JSON.stringify(p.cost); const u = uniq.get(k); u ? u.n++ : uniq.set(k, {p, n: 1}); });
@@ -924,7 +926,7 @@ function parts() {
     }).join("") || '<div class="empty">결과 없음</div>';
     $("#cnt").textContent = n + "개";
   };
-  $("#q").addEventListener("input", draw); $("#g").addEventListener("input", draw); draw();
+  $("#q").addEventListener("input", draw); $("#g").addEventListener("input", draw); $("#tk").addEventListener("input", draw); draw();
 }
 
 // ---------- 칩 ----------
