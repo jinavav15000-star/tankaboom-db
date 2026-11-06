@@ -132,6 +132,7 @@ abbr.term{text-decoration:underline dotted;text-underline-offset:3px;cursor:help
 .tbl tr:hover td{background:rgba(255,255,255,.02)}
 .scroll{overflow:auto;max-width:100%}
 .tbl.nw th,.tbl.nw td{white-space:nowrap}
+.unused{opacity:.3}
 .tbl td.nw,.tbl th.nw,.tbl td.n{white-space:nowrap}
 .best{color:var(--ok);font-weight:700}
 details summary{cursor:pointer;color:var(--ink-2)}
@@ -1109,14 +1110,19 @@ function score() {
   const MODE = {"TDM": "팀 데스매치", "Domination": "점령", "Kill Confirm": "킬 컨펌", "Bounty Hunter": "현상금 사냥", "Flag Strike": "플래그 스트라이크", "Payload": "화물 호송",
     "Free-for-All": "개인전", "Flag Heist": "깃발 탈취", "Sentry Takedown": "파수꾼 격파"};
   const medals = (D.medals || []).filter(m => m.score).sort((a, b) => b.score - a.score);
+  // 모드마다 실제로 쓰이는 목표물 칸(처치·도움·사망은 모든 모드 공통). 나머지 칸은 데이터에 기본값만 채워진 것이라 흐리게.
+  const USED = {"TDM": [], "Free-for-All": [], "Domination": ["capture_factor", "capture_time_factor"], "Kill Confirm": ["beacon_factor"],
+    "Bounty Hunter": ["bounty_factor"], "Flag Strike": ["flag_capture_factor"], "Flag Heist": ["flag_capture_factor"],
+    "Payload": ["payload_capture_factor", "payload_time_factor"], "Sentry Takedown": ["sentry_takedown_factor"]};
+  const used = (f, k) => ["kill_factor", "assist_kill_factor", "death_factor"].includes(k) || !USED[f.Comment] || USED[f.Comment].includes(k);
   app.innerHTML = `<h1>점수·MVP</h1>
   <div class="grid g-2">
     <section class="panel"><h3>MVP는 누가 받나</h3><p class="small"><b>이긴 팀에서 점수 1등</b>이 MVP, <b>진 팀에서 점수 1등</b>이 SVP입니다. 지면 점수가 아무리 높아도 MVP는 받을 수 없습니다.</p><p class="small muted" style="margin:0">실제 경기 결과 9판에서 모두 이 규칙과 일치(관찰).</p></section>
     <section class="panel"><h3>점수는 어떻게 쌓이나</h3><p class="small">처치·도움·점령 등은 아래 표의 계수만큼, 사망은 그만큼 깎이고, 받은 <b>메달의 보너스 점수</b>가 더해집니다. 피해량도 점수가 되는데, 같은 피해라도 <b>상대 체력이 낮을수록(저레벨 판) 점수가 큽니다</b>.</p><p class="small muted" style="margin:0">관찰: 저레벨 봇 판은 피해 1,000당 약 20점, 20레벨 판은 약 7~8점. 그래서 고레벨일수록 처치·도움 비중이 커집니다(추정).</p></section>
   </div>
   <h2>모드별 점수 계수</h2>
-  <div class="panel scroll"><table class="tbl nw"><tr><th>모드</th>${COLS.filter(([k]) => F.some(f => f[k])).map(([, n]) => `<th class="n">${n}</th>`).join("")}</tr>${F.map(f => `<tr><td><b>${esc(MODE[f.Comment] || f.Comment)}</b></td>${COLS.filter(([k]) => F.some(x => x[k])).map(([k]) => `<td class="n">${f[k] ? num(f[k]) : "–"}</td>`).join("")}</tr>`).join("")}</table></div>
-  <p class="small muted">게임 데이터(전투 점수 계수표) 그대로입니다. 처치 점수는 개인전 60 · 팀 데스매치 50 · 나머지 30.</p>
+  <div class="panel scroll"><table class="tbl nw"><tr><th>모드</th>${COLS.filter(([k]) => F.some(f => f[k])).map(([, n]) => `<th class="n">${n}</th>`).join("")}</tr>${F.map(f => `<tr><td><b>${esc(MODE[f.Comment] || f.Comment)}</b></td>${COLS.filter(([k]) => F.some(x => x[k])).map(([k]) => used(f, k) ? `<td class="n"><b>${f[k] ? num(f[k]) : "–"}</b></td>` : `<td class="n unused" title="이 모드에는 해당 목표물이 없어 쓰이지 않는 값">${f[k] ? num(f[k]) : "–"}</td>`).join("")}</tr>`).join("")}</table></div>
+  <p class="small muted">게임 데이터(전투 점수 계수표) 그대로입니다. 처치 점수는 개인전 60 · 팀 데스매치 50 · 나머지 30. <span class="unused">흐린 숫자</span>는 그 모드에 해당 목표물(점령 지점·화물·깃발 등)이 없어 실제로는 받을 수 없는 값으로, 데이터에 기본값만 채워져 있는 것입니다(추정).</p>
   <h2>보너스 점수가 큰 메달 <span class="small muted">${medals.length}개</span></h2>
   <div class="panel scroll"><table class="tbl"><tr><th class="nw">메달</th><th class="n nw">보너스</th><th>조건</th></tr>${medals.map(m => `<tr><td class="nw">${m.icon ? `<img class="cell" src="img/${encodeURIComponent(m.icon)}.webp" alt="" loading="lazy"> ` : ""}<b>${L(m.name) || "–"}</b></td><td class="n nw">+${num(m.score)}</td><td class="small">${L(m.desc) || ""}</td></tr>`).join("")}</table></div>`;
 }
